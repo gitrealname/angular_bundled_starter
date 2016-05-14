@@ -1,0 +1,27 @@
+{
+    "extends": "eslint-config-airbnb",
+
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module"
+    },
+
+    "env": {
+        "browser": true,
+        "node": true
+    },
+
+    "rules": {
+        // Override any settings from the "parent" configuration
+        "arrow-body-style": 0,
+        "no-param-reassign": 0,
+        "no-else-return": 0,
+        "prefer-rest-params": 1,
+        "no-unused-vars": 1,
+        "no-console": 0,
+        "spaced-comment": 0,
+        "global-require": 1,
+        "no-trailing-spaces": 0,
+        "quotes": ["error", "single", {"allowTemplateLiterals": true}]
+    }
+}

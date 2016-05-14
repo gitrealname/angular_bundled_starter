@@ -1,0 +1,12 @@
+.DS_Store
+.tmp
+.git
+.vscode
+node_modules
+dist
+dist.dev/
+dist.test/
+coverage/
+.settings
+*.log
+
