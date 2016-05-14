@@ -9,6 +9,13 @@
 		"bower_components",
 		"jspm_packages",
 		"tmp",
-		"temp"
+		"temp",
+        "coverage",
+        "dest",
+        "dest.dev",
+        "dest.test",
+        "dist",
+        "dist.dev",
+        "dist.test"
 	]
 }

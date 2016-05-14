@@ -2,11 +2,14 @@
 .tmp
 .git
 .vscode
-node_modules
-dist
-dist.dev/
-dist.test/
-coverage/
 .settings
 *.log
+node_modules/
+dist/
+dist.dev/
+dist.test/
+dest/
+dest.dev/
+dest.test/
+coverage/
 
