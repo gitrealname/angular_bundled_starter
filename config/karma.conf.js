@@ -8,7 +8,7 @@ const config = require('./config');
 const webpackBuilder = require('./webpack.builder.js');
 
 const cfg = webpackBuilder.buildConfig();
-//config.debugInspectAndExit(wp);
+//config.debugInspectAndExit(cfg);
 
 module.exports = (karmaConfig) => {
   karmaConfig.set({
@@ -70,7 +70,7 @@ module.exports = (karmaConfig) => {
     //},
 
     coverageReporter: {
-      dir: config.data.dest.coverage + '/',
+      dir: config.root(config.data.dest.coverage),
       reporters: [
         { type: 'text-summary' },
         { type: 'json' },

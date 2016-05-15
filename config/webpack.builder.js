@@ -35,7 +35,8 @@ module.exports.buildMetadata = buildMetadata;
 
 function buildOutput() {
   if (config.isEnvTest()) {
-    return { };
+    return {
+    };
   }
 
   let path = config.root(config.data.dest.prod);
@@ -44,9 +45,6 @@ function buildOutput() {
   if (config.isEnvDev()) {
     path = config.root(config.data.dest.dev);
     publicPath = '/';
-  } else if (config.isEnvTest()) {
-    publicPath = '/';
-    path = config.root(config.data.dest.test);
   }
   if (config.isBuildRelease()) {
     suffix = '.min.';
@@ -98,10 +96,11 @@ function buildEntry() {
   if (config.isEnvTest()) {
     return { };
   }
-  return {
-    common: config.root(config.data.dir.common, 'common.js'),
-    test: config.root(config.data.dir.bundles, 'test', 'test.js'),
+  const e = {
+    common: [config.root(config.data.dir.common, 'common.js')],
+    test: [config.root(config.data.dir.bundles, 'test', 'test.js')],
   };
+  return e;
 }
 module.exports.buildEntry = buildEntry;
 
@@ -201,6 +200,8 @@ function buildLoaders() {
     { test: /\.css$/, loader: styleLoader(`?sourceMap&${m}`) },
     { test: /\.styl$/, loader: styleLoader(`?sourceMap&${m}!stylus?sourceMap`) },
     { test: /\.less$/, loader: styleLoader(`?sourceMap&${m}!less?sourceMap`) },
+    { test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'url-loader' },
+    { test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'url-loader' },
     /*
       * Json loader support for *.json files.
       *
@@ -224,10 +225,10 @@ function buildLoaders() {
       *
       * See: https://github.com/webpack/expose-loader
       */
-      { test: /react\.js$/, loader: 'expose?React' },
+      //{ test: /react\.js$/, loader: 'expose?React' },
       { test: /jquery\.js$/, loader: 'expose?$!expose?jQuery' },
-      { test: /pouchdb\.js$/, loader: 'expose?pouchdb' },
-      { test: /angular\.js$/, loader: 'expose?angular' },
+      //{ test: /pouchdb\.js$/, loader: 'expose?pouchdb' },
+      //{ test: /angular\.js$/, loader: 'expose?angular' },
     ]);
   }
 
@@ -425,6 +426,8 @@ function buildPlugins() {
       // reloading page after webpack rebuilt modules.
       // It also updates stylesheets and inline assets without page reloading.
       new webpack.HotModuleReplacementPlugin(),
+
+      new webpack.NoErrorsPlugin(),
     ]);
   }
 

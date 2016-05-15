@@ -1,6 +1,6 @@
 import angular from 'angular';
 import uiRouter from 'angular-ui-router';
-import aboutComponent from './about.component';
+import AboutComponent from './about.component';
 
 export default angular.module('test.about', [
   uiRouter,
@@ -8,11 +8,12 @@ export default angular.module('test.about', [
 
 .config(($stateProvider) => {
   'ngInject';
-  $stateProvider
-    .state('about', {
-      url: '/about',
-      template: '<about></about>',
-    });
+
+  $stateProvider.state('test.about', {
+    component: 'about',
+    url: '/about', // url is relative to parrent state's url
+    resolve: { },
+  });
 })
 
-.component('about', aboutComponent);
+.component('about', AboutComponent);

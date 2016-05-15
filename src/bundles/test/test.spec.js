@@ -1,19 +1,19 @@
 /*eslint no-unused-expressions: "off"*/
 /*eslint no-unused-vars: "off"*/
 /*global describe it beforeEach inject expect angular mocks*/
-import HomeModule from './home';
-import HomeComponent, { HomeController } from './home.component';
-import HomeTemplate from './home.html';
+import TestModule from './test';
+import TestComponent, { TestController } from './test.component';
+import TestTemplate from './test.html';
 
-describe('Test.Home component', () => {
+describe('Test component', () => {
   let $rootScope;
   let makeController;
 
-  beforeEach(window.module(HomeModule.name));
+  beforeEach(window.module(TestModule.name));
   beforeEach(inject((_$rootScope_) => {
     $rootScope = _$rootScope_;
     makeController = () => {
-      return new HomeController();
+      return new TestController();
     };
   }));
 
@@ -33,16 +33,16 @@ describe('Test.Home component', () => {
     // template specs
     // tip: use regex to ensure correct bindings are used e.g., {{  }}
     it('has name in template [REMOVE]', () => {
-      expect(HomeTemplate).to.match(/{{\s?vm\.name\s?}}/g);
+      expect(TestTemplate).to.match(/{{\s?vm\.name\s?}}/g);
     });
   });
 
   describe('Component', () => {
     // component/directive specs
-    const component = HomeComponent;
+    const component = TestComponent;
 
     it('includes the intended template', () => {
-      expect(component.template).to.equal(HomeTemplate);
+      expect(component.template).to.equal(TestTemplate);
     });
 
     it('uses `controllerAs` syntax', () => {
@@ -50,7 +50,7 @@ describe('Test.Home component', () => {
     });
 
     it('invokes the right controller', () => {
-      expect(component.controller).to.equal(HomeController);
+      expect(component.controller).to.equal(TestController);
     });
   });
 });
