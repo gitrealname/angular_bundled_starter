@@ -1,10 +1,11 @@
+/*eslint prefer-template: 0*/
+/*eslint max-len: 0*/
 /**
  * @author: FEi
  */
 const config = require('./config');
 
 config.setEnvTest();
-config.setBuildDebug();
 
 const webpackBuilder = require('./webpack.builder.js');
 
@@ -18,7 +19,7 @@ module.exports = (karmaConfig) => {
     webpack: cfg,
 
     // base path that will be used to resolve all patterns (e.g. files, exclude)
-    basePath: config.root(),
+    basePath: config.rootConfig(),
 
     /*
      * Frameworks to use
@@ -41,6 +42,7 @@ module.exports = (karmaConfig) => {
       'karma-sourcemap-loader',
       'karma-webpack',
       'karma-coverage',
+      'karma-babel-preprocessor',
     ],
 
     /*
@@ -48,16 +50,29 @@ module.exports = (karmaConfig) => {
      *
      * we are building the test environment in ./spec-bundle.js
      */
-    files: [{ pattern: './config/spec.bundle.js', watched: false }],
+    files: [
+      //{ pattern: './config.js', watched: false },
+      { pattern: './spec.bundle.js', watched: false },
+    ],
 
     /*
      * preprocess matching files before serving them to the browser
      * available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
      */
-    preprocessors: { './config/spec.bundle.js': ['coverage', 'webpack', 'sourcemap'] },
+    preprocessors: {
+      //'./config.js': ['webpack'],
+      './spec.bundle.js': ['coverage', 'webpack', 'sourcemap'],
+    },
+
+    //babelPreprocessor: {
+    //  options: {
+    //    sourceMap: 'inline',
+    //    presets: ['es2015'],
+    //  },
+    //},
 
     coverageReporter: {
-      dir: 'coverage/',
+      dir: config.data.dest.coverage + '/',
       reporters: [
         { type: 'text-summary' },
         { type: 'json' },
@@ -74,10 +89,11 @@ module.exports = (karmaConfig) => {
      * possible values: 'dots', 'progress'
      * available reporters: https://npmjs.org/browse/keyword/karma-reporter
      */
-    reporters: ['mocha', 'coverage'],
+    //NOTE: is being overriden by gulp/test.js
+    reporters: ['dots'],
 
     // web server port
-    port: 9876,
+    port: config.data.test.port,
 
     // enable / disable colors in the output (reporters and logs)
     colors: true,

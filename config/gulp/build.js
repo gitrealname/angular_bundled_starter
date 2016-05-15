@@ -9,7 +9,7 @@ import config from '../config';
 import webpackBuilder from '../webpack.builder.js';
 
 function webpackRun(wpConfig, cb, logMode) {
-  config.debugInspectAndExit(wpConfig);
+  //config.debugInspectAndExit(wpConfig);
 
   webpack(wpConfig, (err, stats) => {
     //2 - enforce log, 1 - only on error, 0 - no log
@@ -29,31 +29,27 @@ function webpackRun(wpConfig, cb, logMode) {
 }
 
 gulp.task('build:debug', (cb) => {
-  config.setEnvProd();
-  config.setBuildDebug();
+  config.setEnvProdDebug();
   const wp = webpackBuilder.buildConfig();
   webpackRun(wp, cb, 2);
 });
 
 gulp.task('build:release', (cb) => {
-  config.setEnvProd();
-  config.setBuildRelease();
+  config.setEnvProdRelease();
   const wp = webpackBuilder.buildConfig();
   webpackRun(wp, cb, 2);
 });
 
 gulp.task('build:dual:release', (cb) => {
-  config.setEnvProd();
-  config.setBuildRelease();
+  config.setEnvProdRelease();
   const wp = webpackBuilder.buildConfig();
   webpackRun(wp, cb, 1);
 });
 
 gulp.task('build:dual:debug', ['build:dual:release'], (cb) => {
-  config.setEnvProd();
-  config.setBuildDebug();
+  config.setEnvProdDebug();
   const wp = webpackBuilder.buildConfig();
   webpackRun(wp, cb, 2);
 });
 
-gulp.task('build', ['build:dual:release', 'build:dual:debug']);
+gulp.task('build', ['test:runonce', 'build:dual:release', 'build:dual:debug']);

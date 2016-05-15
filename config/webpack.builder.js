@@ -38,12 +38,15 @@ function buildOutput() {
     return { };
   }
 
-  let path = 'dist';
+  let path = config.root(config.data.dest.prod);
+  let publicPath = '';
   let suffix = '.';
   if (config.isEnvDev()) {
-    path = 'dist.dev';
+    path = config.root(config.data.dest.dev);
+    publicPath = '/';
   } else if (config.isEnvTest()) {
-    path = 'dist.test';
+    publicPath = '/';
+    path = config.root(config.data.dest.test);
   }
   if (config.isBuildRelease()) {
     suffix = '.min.';
@@ -56,6 +59,13 @@ function buildOutput() {
      * See: http://webpack.github.io/docs/configuration.html#output-path
      */
     path,
+
+    /**
+     * The public URL address of the output files when referenced in a browser.
+     *
+     * See: http://webpack.github.io/docs/configuration.html#output-publicpath
+     */
+    publicPath,
 
     /**
      * Specifies the name of each output file on disk.
@@ -89,8 +99,8 @@ function buildEntry() {
     return { };
   }
   return {
-    common: config.rootSrc('common', 'common.js'),
-    test: config.rootSrc('bundles', 'test', 'test.js'),
+    common: config.root(config.data.dir.common, 'common.js'),
+    test: config.root(config.data.dir.bundles, 'test', 'test.js'),
   };
 }
 module.exports.buildEntry = buildEntry;
@@ -339,11 +349,17 @@ function buildPlugins() {
      */
     // NOTE: when adding more properties make sure you include them in custom-typings.d.ts
     new DefinePlugin({
-      'process.env': config.env,
+      'process.env': JSON.stringify(config.env),
     }),
   ];
 
-  if (!config.isEnvTest()) {
+  if (config.isEnvTest()) {
+    plst = plst.concat([
+      new DefinePlugin({
+        'config.data': JSON.stringify(config.data), //will be used in spec.bundle.js
+      }),
+    ]);
+  } else {
     plst = plst.concat([
       /*
       * Plugin: HtmlWebpackPlugin
@@ -354,7 +370,7 @@ function buildPlugins() {
       * See: https://github.com/ampedandwired/html-webpack-plugin
       */
       new HtmlWebpackPlugin({
-        template: 'html!./src/index.html',
+        template: 'html!./' + config.data.file.index,
         inject: 'body',
         hash: true,
         chunksSortMode: 'dependency',
@@ -369,8 +385,12 @@ function buildPlugins() {
       * See: https://www.npmjs.com/package/copy-webpack-plugin
       */
       new CopyWebpackPlugin([{
-        from: 'src/assets',
+        from: config.data.dir.assets,
         to: 'assets',
+      }]),
+      new CopyWebpackPlugin([{
+        from: config.data.dir.data,
+        to: 'data',
       }]),
 
       /*
@@ -459,14 +479,14 @@ function buildDevServer() {
     return { };
   }
   return {
-    port: 3000,
-    host: 'localhost',
+    port: config.data.dev.port.port,
+    host: config.data.dev.host,
     historyApiFallback: true,
     watchOptions: {
       aggregateTimeout: 300,
       poll: 1000,
     },
-    outputPath: config.root('dist.dev'),
+    outputPath: config.root(config.data.dest.dev),
   };
 }
 module.exports.buildDevServer = buildDevServer;
@@ -492,7 +512,7 @@ function buildTsLint() {
   const opt = {
     emitErrors: true,
     failOnHint: true,
-    resourcePath: 'src',
+    resourcePath: config.data.dir.src,
   };
   if (config.isEnvDev()) {
     opt.emitErrors = false;

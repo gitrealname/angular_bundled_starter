@@ -1,17 +1,20 @@
+/*eslint no-undef:0*/
+/*eslint prefer-template: 0*/
+/*eslint max-len: 0*/
 /**
- * @author: @AngularClass
+ * @author: FEi
  */
 
 require('ts-node/register');
-const helpers = require('./helpers');
+const config = require('./config');
 
 exports.config = {
-  baseUrl: 'http://localhost:3000/',
+  baseUrl: 'http://' + config.data.dev.host + ':' + config.data.dev.port + '/',
 
   // use `npm run e2e`
   specs: [
-    helpers.root('src/**/**.e2e.ts'),
-    helpers.root('src/**/*.e2e.ts'),
+    config.root(config.data.dir.src + '/**/**.e2e.ts'),
+    config.root(config.data.dir.src + '/**/*.e2e.ts'),
   ],
   exclude: [],
 

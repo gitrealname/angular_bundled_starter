@@ -6,47 +6,97 @@ import util from 'util';
 /**
  * @author: FEi
  */
-const console = require('console');
-const path = require('path');
-const yargs = require('yargs');
-
-const rootPath = path.resolve(__dirname, '..');
+import console from 'console';
+import path from 'path';
+import yargs from 'yargs';
 
 //config
-const config = {
+const data = {
+  //relative to root
+  dir: {
+    src: 'src',
+    generator: 'generator',
+    config: 'config',
+    assets: 'src/assets',
+    data: 'src/data',
+    common: 'src/common',
+    bundles: 'src/bundles',
+  },
+  file: {
+    index: 'src/index.html',
+  },
+  dest: {
+    prod: 'dest',
+    dev: 'dest.dev',
+    test: 'dest.test',
+    coverage: 'dest.test/coverage',
+  },
+  env: {
+    prod: 'production',
+    dev: 'development',
+    test: 'test',
+  },
+  build: {
+    release: 'release',
+    debug: 'debug',
+    test: 'test',
+  },
+  dev: {
+    host: 'localhost',
+    port: 3000,
+  },
+  test: {
+    port: 3666,
+  },
 };
+exports.data = data;
 
 const env = {
-  ENV: 'production', //vs development, test
-  BUILD: 'release',  //vs debug, test
+  ENV: data.env.prod,
+  BUILD: data.build.release,
+  WATCH: false, //is true when 'continues' testing/development is running
 };
+exports.env = env;
 
 // Helper functions
+const rootPath = path.resolve(__dirname, '..');
+
 function root(args) {
   args = Array.prototype.slice.call(arguments, 0);
   return path.join.apply(path, [rootPath].concat(args));
 }
+exports.root = root;
 console.log('Root directory:', root());
 
 function rootNode(args) {
   args = Array.prototype.slice.call(arguments, 0);
   return root.apply(path, ['node_modules'].concat(args));
 }
+exports.rootNode = rootNode;
 
 function rootGenerator(args) {
   args = Array.prototype.slice.call(arguments, 0);
-  return root.apply(path, ['generator'].concat(args));
+  return root.apply(path, [data.dir.generator].concat(args));
 }
+exports.rootGenerator = rootGenerator;
+
+function rootConfig(args) {
+  args = Array.prototype.slice.call(arguments, 0);
+  return root.apply(path, [data.dir.config].concat(args));
+}
+exports.rootConfig = rootConfig;
 
 function rootSrc(args) {
   args = Array.prototype.slice.call(arguments, 0);
-  return root.apply(path, ['src'].concat(args));
+  return root.apply(path, [data.dir.src].concat(args));
 }
+exports.rootSrc = rootSrc;
 
 function rootAssets(args) {
   args = Array.prototype.slice.call(arguments, 0);
-  return root.apply(path, rootSrc('assets'), args);
+  return root.apply(path, rootSrc(data.dir.assets), args);
 }
+exports.rootAssets = rootAssets;
 
 function getProcessingFlag(paramName) {
   if (paramName in yargs.args) {
@@ -54,6 +104,7 @@ function getProcessingFlag(paramName) {
   }
   return undefined;
 }
+exports.getProcessingFlag = getProcessingFlag;
 
 function prependExt(extensions, args) {
   args = args || [];
@@ -64,35 +115,29 @@ function prependExt(extensions, args) {
     }));
   }, ['']);
 }
+exports.prependExt = prependExt;
 
 function debugInspectAndExit(obj) {
   console.log(util.inspect(obj, { colors: true, depth: 10, showHidden: false }));
   process.exit(1);
 }
+exports.debugInspectAndExit = debugInspectAndExit;
 
 /*
 * Adjust environemnt. Application will have access to env through 'process.env'
 */
-exports.setEnvProd = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'production'; };
-exports.setBuildRelease = () => { env.BUILD = 'release'; };
-exports.setBuildDebug = () => { env.BUILD = 'debug'; };
+exports.setEnvProdRelease = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod; env.BUILD = data.build.release; };
+exports.setEnvProdDebug = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod; env.BUILD = data.build.debug; };
+exports.setEnvDev = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'development'; env.BUILD = 'debug'; env.WATCH = false; };
+exports.setEnvDevWatch = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'development'; env.WATCH = true; };
+exports.setEnvTest = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'test'; env.BUILD = 'test'; env.WATCH = false; };
+exports.setEnvTestWatch = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'test'; env.BUILD = 'test'; env.WATCH = true; };
 
-exports.setEnvDev = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'development'; env.BUILD = 'debug'; };
-exports.setEnvTest = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'test'; env.BUILD = 'test'; };
+exports.isEnvProd = () => { return env.ENV === data.env.prod; };
+exports.isEnvDev = () => { return env.ENV === data.env.dev; };
+exports.isEnvTest = () => { return env.ENV === data.env.test; };
+exports.isBuildRelease = () => { return env.BUILD === data.build.release; };
+exports.isBuildDebug = () => { return env.BUILD === data.build.debug; };
+exports.isBuildTest = () => { return env.BUILD === data.build.test; };
+exports.isWatched = () => { return env.WATCH === true; };
 
-exports.isEnvProd = () => { return env.ENV === 'production'; };
-exports.isEnvDev = () => { return env.ENV === 'development'; };
-exports.isEnvTest = () => { return env.ENV === 'test'; };
-exports.isBuildRelease = () => { return env.BUILD === 'release'; };
-exports.isBuildDebug = () => { return env.BUILD === 'debug'; };
-
-exports.root = root;
-exports.rootNode = rootNode;
-exports.rootGenerator = rootGenerator;
-exports.rootSrc = rootSrc;
-exports.rootAssets = rootAssets;
-exports.getProcessingFlag = getProcessingFlag;
-exports.prependExt = prependExt;
-exports.debugInspectAndExit = debugInspectAndExit;
-exports.config = config;
-exports.env = env;
