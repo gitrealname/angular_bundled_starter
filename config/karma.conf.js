@@ -5,8 +5,6 @@
  */
 const config = require('./config');
 
-config.setEnvTest();
-
 const webpackBuilder = require('./webpack.builder.js');
 
 const cfg = webpackBuilder.buildConfig();
