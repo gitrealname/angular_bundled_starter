@@ -1,4 +1,7 @@
-import gulp from 'gulp';
+/*
+* See: https://www.npmjs.com/package/gulp-help
+*/
+const gulp = require('gulp-help')(require('gulp'));
 import rename from 'gulp-rename';
 import template from 'gulp-template';
 

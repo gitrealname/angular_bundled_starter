@@ -1,6 +1,9 @@
 /*eslint global-require: 0*/
 
-import gulp from 'gulp';
+/*
+* See: https://www.npmjs.com/package/gulp-help
+*/
+const gulp = require('gulp-help')(require('gulp'));
 import gutil from 'gulp-util';
 import colorsSupported from 'supports-color';
 import webpack from 'webpack';

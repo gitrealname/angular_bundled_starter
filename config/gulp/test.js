@@ -1,5 +1,9 @@
 /*eslint prefer-template: 0*/
-import gulp from 'gulp';
+
+/*
+* See: https://www.npmjs.com/package/gulp-help
+*/
+const gulp = require('gulp-help')(require('gulp'));
 
 import config from '../config';
 const KarmaServer = require('karma').Server;
