@@ -5,6 +5,7 @@ import Common from '../../common/common';
 import Components from './components/components';
 import Services from './services/services';
 import TestComponent from './test.component';
+import config from './config';
 
 export default angular.module('test', [
   uiRouter,
@@ -29,4 +30,6 @@ export default angular.module('test', [
     });
 })
 
-.component('test', TestComponent);
+.component('test', TestComponent)
+
+.constant('config', config);

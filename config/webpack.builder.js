@@ -98,7 +98,7 @@ function buildEntry() {
   }
   const entries = { };
   config.data.entryMap.forEach((h) => {
-    entries[h.bundle] = config.rootSrc(h.file);
+    entries[h.bundle] = [config.rootSrc(h.file)];
   });
 
   return entries;
@@ -107,7 +107,6 @@ module.exports.buildEntry = buildEntry;
 
 function buildResolve() {
   function buildAlias() {
-    return { };
   }
 
   return {

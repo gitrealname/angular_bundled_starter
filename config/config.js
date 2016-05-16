@@ -11,6 +11,8 @@ import console from 'console';
 import path from 'path';
 import glob from 'glob';
 import fs from 'fs';
+import gutil from 'gulp-util';
+import colors from 'colors';
 const argv = require('yargs')
   .alias('p', 'parent')
   .alias('n', 'name')
@@ -80,11 +82,29 @@ const env = {
   ENV: data.env.prod,
   BUILD: data.build.release,
   WATCH: false, //is true when 'continues' testing/development is running
-  NAMES: [], //list of --name param values
+  NAMES: ['DEFINED BELOW'], //list of --name param values
 };
 exports.env = env;
 
 // Helper functions
+function error(...arg) {
+  console.log(('ERROR: ' + arg.join(' ')).bold.red);
+  gutil.beep();
+  process.exit(1);
+}
+exports.error = error;
+
+function info(...arg) {
+  console.log(arg.join(' ').bold.green);
+}
+exports.info = info;
+
+function warn(...arg) {
+  console.log(('WARNING: ' + arg.join(' ')).bold.yellow);
+}
+exports.warn = warn;
+
+
 const rootPath = path.resolve(__dirname, '..');
 
 function root(args) {
@@ -92,7 +112,7 @@ function root(args) {
   return path.join.apply(path, [rootPath].concat(args));
 }
 exports.root = root;
-console.log('Root directory:', root());
+info('Root directory: ', root());
 
 function rootSrc(args) {
   args = Array.prototype.slice.call(arguments, 0);
@@ -165,12 +185,6 @@ data.entryMap = entryMap;
 //debugInspectAndExit(entryDirs);
 //debugInspectAndExit(entryMap);
 //debugInspectAndExit(dirMap);
-
-function error(message) {
-  console.error(message);
-  process.exit(1);
-}
-exports.error = error;
 
 function fileExists(fileName) {
   try {

@@ -80,6 +80,7 @@ function createGeneratorTemplateParams(collectionName, targetIsDir, isBundle = f
     pName: config.toPascalCase(name),
     cFullName: 'SEE BELOW',
     dotedFullName: parentChunks.concat(lcName).join('.'),
+    dotedPascalFullName: parentChunks.concat(lcName).map((val) => config.toPascalCase(val)).join('.'),
     dushedFullName: parentChunks.concat(lcName).join('-'),
     destDir,
     parentDir,
@@ -111,7 +112,7 @@ gulp.task('generate:component', () => {
   return generate('component', 'components', true, false);
 });
 
-gulp.task('generate:bundle', () => {
+gulp.task('generate:bundle', ['generate:component'], () => {
   return generate('bundle', undefined, true, true);
 });
 
@@ -120,5 +121,6 @@ gulp.task('generate:service', () => {
 });
 
 gulp.task('generate:directive', () => {
-  return generate('directive', 'directives', true, false);
+  config.error('Directive generation is not yet implemented');
+  //return generate('directive', 'directives', true, false);
 });
