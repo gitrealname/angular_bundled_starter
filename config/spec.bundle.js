@@ -24,12 +24,32 @@ const mocks = require('angular-mocks');
 //NOTE: variables in require.context don't work!!!
 const context = require.context('../src', true, /\.spec\.(ts|js)/);
 
-context.keys().forEach((val) => {
+//Filtertest files, leave only those that were explicetly specified
+// by --name command line param (which is stored in process.env.PARAMS)
+// Accept all files if --name was not specified
+const list = context.keys().filter((val) => {
+  if (!process.env.NAMES.length) {
+    return true;
+  }
+  // remove leading './'
+  const chunks = val.split('/').slice(1);
+  let bundle = chunks[0];
+  //if starts with bundles, take next elem
+  if (bundle === 'bundles') {
+    bundle = chunks[1];
+  }
+  //search for bundle in the name list
+  return process.env.NAMES.indexOf(bundle) >= 0;
+});
+
+/*DEBUG:
+list.forEach((val) => {
   console.log(val);
 });
+*/
 
 // Get all files, for each file, call the context function
 // that will require the file and load it here. Context will
 // loop and require those spec files here.
-const modules = context.keys().forEach(context);
+const modules = list.forEach(context);
 

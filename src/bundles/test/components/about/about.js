@@ -10,10 +10,10 @@ export default angular.module('test.about', [
   'ngInject';
 
   $stateProvider.state('test.about', {
-    component: 'about',
+    component: 'testAbout',
     url: '/about', // url is relative to parrent state's url
     resolve: { },
   });
 })
 
-.component('about', AboutComponent);
+.component('testAbout', AboutComponent);

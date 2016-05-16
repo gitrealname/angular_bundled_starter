@@ -70,6 +70,7 @@ const data = {
   entryMap: {
     'DEFINED BELOW!': 1,
   },
+  nameList: ['DEFINED BELOW'], //list of names provided in command line by --name
 };
 data.dest.coverage = data.dest.test + '/coverage';
 data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
@@ -79,6 +80,7 @@ const env = {
   ENV: data.env.prod,
   BUILD: data.build.release,
   WATCH: false, //is true when 'continues' testing/development is running
+  NAMES: [], //list of --name param values
 };
 exports.env = env;
 
@@ -109,15 +111,19 @@ function getProcessingFlag(paramName) {
 }
 exports.getProcessingFlag = getProcessingFlag;
 
+const names = getProcessingFlag('name') || [];
+data.nameList = [].concat(names);
+env.NAMES = data.nameList;
+
 /*
 * Process command line parameters and create halping data sets
 */
 if (!!argv._ && argv._.length > 1) {
   argv.name = argv._[1]; //[0] - gulp command
 }
-const srcDirs = glob.sync(root('src', '**'), { })
+const srcDirs = glob.sync(root(data.dir.src, '**'), { })
   .filter((f) => {
-    return fs.statSync(f).isDirectory();
+    return fs.lstatSync(f).isDirectory();
   }).map((d) => {
     return d.substring(rootSrc().length + 1);
   });
@@ -132,8 +138,7 @@ const entryDirs = srcDirs.filter((d) => {
   if (d.indexOf(data.dir.common) === 0 && lst.length === 1) {
     ret = true;
   } else if (d.indexOf(data.dir.bundles) === 0 && lst.length === 2) {
-    const bundleName = getProcessingFlag('name');
-    if (bundleName === undefined || lst[1] === bundleName) {
+    if (!data.nameList.length || names.indexOf(lst[1]) >= 0) {
       ret = true;
     }
   }
@@ -143,9 +148,16 @@ const entryMap = entryDirs.map((d) => {
   const lst = d.split('/');
   const bundle = lst.pop();
   //Todo: handle .ts files!!!
-  const h = { bundle,
+  const h = {
+    bundle,
     file: bundle + '/' + bundle + '.js',
+    isCommon: false,
   };
+  if (h.bundle === data.dir.common) {
+    h.isCommon = true;
+  } else {
+    h.file = data.dir.bundles + '/' + h.file;
+  }
   return h;
 });
 data.entryMap = entryMap;
@@ -154,10 +166,31 @@ data.entryMap = entryMap;
 //debugInspectAndExit(entryMap);
 //debugInspectAndExit(dirMap);
 
-function err(message) {
+function error(message) {
   console.error(message);
   process.exit(1);
 }
+exports.error = error;
+
+function fileExists(fileName) {
+  try {
+    const stats = fs.lstatSync(fileName);
+    return stats.isFile();
+  } catch (e) {
+    return false;
+  }
+}
+exports.fileExists = fileExists;
+
+function dirExists(dirName) {
+  try {
+    const stats = fs.lstatSync(dirName);
+    return stats.isDirectory();
+  } catch (e) {
+    return false;
+  }
+}
+exports.dirExists = dirExists;
 
 function toPascalCase(val) {
   return val.charAt(0).toUpperCase() + val.slice(1);
@@ -168,69 +201,6 @@ function toCamelCase(val) {
   return val.charAt(0).toLowerCase() + val.slice(1);
 }
 exports.toCamelCase = toCamelCase;
-
-function createGeneratorTemplateParams(dir, isBundle = false) {
-  let parent = getProcessingFlag('parent');
-  if (isBundle) {
-    parent = data.dir.bundles;
-  }
-  let name = getProcessingFlag('name');
-  if (!parent || !name) {
-    err('Inavlid parameters');
-  }
-  const lcName = name.toLowerCase();
-  //don't allow '-' in the name
-  if (name.split('-').length > 1) {
-    err('Name must not contain "-"');
-  }
-  name = name.replace(/\/$/, '').replace(/^\//, '');
-  parent = parent.replace(/\/$/, '').replace(/^\//, '');
-  parent = parent.toLowerCase().split('\\').join('/');
-  const parentChunks = parent.split('/');
-  //if parent doesn't contain 'common' or 'bundles' -> assume bundles
-  if (parentChunks[0] !== data.dir.common && parentChunks[0] !== data.dir.bundles) {
-    parentChunks.unshift(data.dir.bundles);
-    parent = data.dir.bundles + '/' + parent;
-  }
-  //bundle module must be under named bundle
-  if (!isBundle && parentChunks[0] !== data.dir.common && parentChunks.length === 1) {
-    err('Invalid location: ' + parent + '; specify full parent path (e.g bundles/test;  common)');
-  }
-  //parent must be within src dir map
-  if (!dirMap[parent] || (parentChunks[0] !== data.dir.common && parentChunks[0] !== data.dir.bundles)) {
-    err('Invalid parent: ' + parent);
-  }
-  //module with this name already exists
-  const fullName = parent + '/' + lcName;
-  if (dirMap[fullName]) {
-    err('Module already exists: ' + name);
-  }
-  //compile
-  if (isBundle) {
-    dir = '';
-  } else {
-    dir = dir + '/';
-  }
-  const destPath = parent + '/' + dir + lcName;
-  const isCommon = parentChunks[0] === data.dir.common;
-  if (!isCommon) {
-    //remove 'bundles' from the list
-    parentChunks.shift();
-  }
-  const result = {
-    name,
-    lcName,
-    cName: toCamelCase(name),
-    pName: toPascalCase(name),
-    dotName: parentChunks.join('.') + '.' + lcName,
-    dushName: parentChunks.join('-') + '-' + lcName,
-    destPath,
-  };
-
-  debugInspectAndExit(result);
-  return result;
-}
-exports.createGeneratorTemplateParams = createGeneratorTemplateParams;
 
 function rootNode(args) {
   args = Array.prototype.slice.call(arguments, 0);

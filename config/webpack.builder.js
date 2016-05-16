@@ -96,11 +96,12 @@ function buildEntry() {
   if (config.isEnvTest()) {
     return { };
   }
-  const e = {
-    common: [config.root(config.data.dir.common, 'common.js')],
-    test: [config.root(config.data.dir.bundles, 'test', 'test.js')],
-  };
-  return e;
+  const entries = { };
+  config.data.entryMap.forEach((h) => {
+    entries[h.bundle] = config.rootSrc(h.file);
+  });
+
+  return entries;
 }
 module.exports.buildEntry = buildEntry;
 
