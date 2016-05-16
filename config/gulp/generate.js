@@ -17,7 +17,7 @@ function createGeneratorTemplateParams(collectionName, targetIsDir, isBundle = f
   if (isBundle) {
     parent = data.dir.bundles;
   }
-  let name = config.getProcessingFlag('name');
+  let name = config.data.nameList[0];
   if (!parent || !name) {
     config.error('Inavlid parameters');
   }
@@ -72,6 +72,7 @@ function createGeneratorTemplateParams(collectionName, targetIsDir, isBundle = f
     config.error('Module already exists: ' + destDir);
   }
 
+
   //compile
   const result = {
     name: lcName,
@@ -84,7 +85,14 @@ function createGeneratorTemplateParams(collectionName, targetIsDir, isBundle = f
     dushedFullName: parentChunks.concat(lcName).join('-'),
     destDir,
     parentDir,
+    bundleRelativeRoot: './', //see below
+    bundleName: lcName, //see below
   };
+  if (!isBundle) {
+    result.bundleName = parentChunks[0];
+    const len = result.dotedFullName.split('.').length + (targetIsDir ? 0 : 1);
+    result.bundleRelativeRoot = '../'.repeat(len);
+  }
 
   //calculate full name in camel case
   result.cFullName = parentChunks
@@ -98,14 +106,17 @@ exports.createGeneratorTemplateParams = createGeneratorTemplateParams;
 
 function generate(generatorType, collectionName, targetIsDir, isBundle = false) {
   const tmpl = createGeneratorTemplateParams(collectionName, targetIsDir, isBundle);
-  config.debugInspectAndExit(tmpl);
 
+  //config.debugInspectAndExit(tmpl);
+
+  const destPath = config.rootSrc('' + tmpl.destdir + '');
+  config.error(destPath);
   return gulp.src(config.rootGenerator(generatorType + '/**/*.**'))
     .pipe(template(tmpl))
     .pipe(rename((p) => {
       p.basename = p.basename.replace('temp', tmpl.lcName);
     }))
-    .pipe(gulp.dest(tmpl.destPath));
+    .pipe(gulp.dest(destPath));
 }
 
 gulp.task('generate:component', () => {

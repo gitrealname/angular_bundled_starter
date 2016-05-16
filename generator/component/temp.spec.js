@@ -1,19 +1,19 @@
 /*eslint no-unused-expressions: "off"*/
 /*eslint no-unused-vars: "off"*/
 /*global describe it beforeEach inject expect angular mocks*/
-import <%= upCaseName %>Module from './<%= name %>'
-import <%= upCaseName %>Component, {<%= upCaseName %>Controller} from './<%= name %>.component';
-import <%= upCaseName %>Template from './<%= name %>.html';
+import <%= pName %>Module from './<%= lcName %>';
+import <%= pName %>Component, { <%= pName %>Controller } from './<%= lcName %>.component';
+import <%= pName %>Template from './<%= lcName %>.html';
 
-describe('<%= upCaseName %> component', () => {
+describe('<%= dotedPascalFullName %> component', () => {
   let $rootScope;
   let makeController;
 
-  beforeEach(window.module(<%= upCaseName %>Module.name));
+  beforeEach(window.module(<%= pName %>Module.name));
   beforeEach(inject((_$rootScope_) => {
     $rootScope = _$rootScope_;
     makeController = () => {
-      return new <%= upCaseName %>Controller();
+      return new <%= pName %>Controller();
     };
   }));
 
@@ -24,7 +24,7 @@ describe('<%= upCaseName %> component', () => {
   describe('Controller', () => {
     // controller specs
     it('has a name property [REMOVE]', () => { // erase if removing this.name from the controller
-      let controller = makeController();
+      const controller = makeController();
       expect(controller).to.have.property('name');
     });
   });
@@ -33,24 +33,24 @@ describe('<%= upCaseName %> component', () => {
     // template specs
     // tip: use regex to ensure correct bindings are used e.g., {{  }}
     it('has name in template [REMOVE]', () => {
-      expect(<%= upCaseName %>Template).to.match(/{{\s?vm\.name\s?}}/g);
+      expect(<%= pName %>Template).to.match(/{{\s?vm\.name\s?}}/g);
     });
   });
 
   describe('Component', () => {
-      // component/directive specs
-      let component = <%= upCaseName %>Component;
+    // component/directive specs
+    const component = <%= pName %>Component;
 
-      it('includes the intended template',() => {
-        expect(component.template).to.equal(<%= upCaseName %>Template);
-      });
+    it('includes the intended template', () => {
+      expect(component.template).to.equal(<%= pName %>Template);
+    });
 
-      it('uses `controllerAs` syntax', () => {
-        expect(component).to.have.property('controllerAs');
-      });
+    it('uses `controllerAs` syntax', () => {
+      expect(component).to.have.property('controllerAs');
+    });
 
-      it('invokes the right controller', () => {
-        expect(component.controller).to.equal(<%= upCaseName %>Controller);
-      });
+    it('invokes the right controller', () => {
+      expect(component.controller).to.equal(<%= pName %>Controller);
+    });
   });
 });

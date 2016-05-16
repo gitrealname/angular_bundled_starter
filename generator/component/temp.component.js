@@ -1,10 +1,10 @@
-import template from './<%= name %>.html';
-import './<%= name %>.styl';
+import './<%= lcName %>.styl';
+import template from './<%= lcName %>.html';
 
-export class <%= upCaseName %>Controller {
+export class <%= pName %>Controller {
   constructor() {
     'ngInject';
-    this.name = '<%= name %>';
+    this.name = '<%= cFullName %>';
   }
 }
 
@@ -12,8 +12,6 @@ export default {
   restrict: 'E',
   bindings: {},
   template,
-  controller: <%= upCaseName %>Controller,
+  controller: <%= pName %>Controller,
   controllerAs: 'vm',
 };
-
-

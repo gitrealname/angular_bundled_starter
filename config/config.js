@@ -88,19 +88,19 @@ exports.env = env;
 
 // Helper functions
 function error(...arg) {
-  console.log(('ERROR: ' + arg.join(' ')).bold.red);
+  console.log(colors.red('ERROR: ' + arg.join(' ')));
   gutil.beep();
   process.exit(1);
 }
 exports.error = error;
 
 function info(...arg) {
-  console.log(arg.join(' ').bold.green);
+  console.log(colors.bold.green(arg.join(' ')));
 }
 exports.info = info;
 
 function warn(...arg) {
-  console.log(('WARNING: ' + arg.join(' ')).bold.yellow);
+  console.log(colors.bold.yellow('WARNING: ' + arg.join(' ')));
 }
 exports.warn = warn;
 
