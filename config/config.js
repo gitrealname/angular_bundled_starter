@@ -1,5 +1,6 @@
 /*eslint max-len: 0*/
 /*eslint prefer-rest-params: 0*/
+/*eslint prefer-template: 0*/
 
 import util from 'util';
 
@@ -8,19 +9,36 @@ import util from 'util';
  */
 import console from 'console';
 import path from 'path';
-import yargs from 'yargs';
+import glob from 'glob';
+import fs from 'fs';
+const argv = require('yargs')
+  .alias('p', 'parent')
+  .alias('n', 'name')
+  .argv;
+
+function debugInspectAndExit(...args) {
+  args.forEach((o) => {
+    console.log(util.inspect(o, { colors: true, depth: 10, showHidden: false }));
+  });
+  //console.log(util.inspect(obj, { colors: true, depth: 10, showHidden: false }));
+  process.exit(1);
+}
+exports.debugInspectAndExit = debugInspectAndExit;
+//debugInspectAndExit(argv);
 
 //config
 const data = {
   //relative to root
   dir: {
+    //relative to root
     src: 'src',
     generator: 'generator',
     config: 'config',
-    assets: 'src/assets',
-    data: 'src/data',
-    common: 'src/common',
-    bundles: 'src/bundles',
+    //relative to src
+    assets: 'assets',
+    data: 'data',
+    common: 'common',
+    bundles: 'bundles',
   },
   file: {
     index: 'src/index.html',
@@ -29,7 +47,7 @@ const data = {
     prod: 'dest',
     dev: 'dest.dev',
     test: 'dest.test',
-    coverage: 'dest.test/coverage',
+    coverage: 'DEFINED BELOW!',
   },
   env: {
     prod: 'production',
@@ -44,12 +62,17 @@ const data = {
   dev: {
     host: 'localhost',
     port: 3000,
-    url: 'http://localhost:3000',
+    url: 'DEFINED BELOW!',
   },
   test: {
     port: 3666,
   },
+  entryMap: {
+    'DEFINED BELOW!': 1,
+  },
 };
+data.dest.coverage = data.dest.test + '/coverage';
+data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
 exports.data = data;
 
 const env = {
@@ -69,6 +92,146 @@ function root(args) {
 exports.root = root;
 console.log('Root directory:', root());
 
+function rootSrc(args) {
+  args = Array.prototype.slice.call(arguments, 0);
+  return root.apply(path, [data.dir.src].concat(args));
+}
+exports.rootSrc = rootSrc;
+
+function getProcessingFlag(paramName) {
+  if (paramName === undefined) {
+    return argv._;
+  }
+  if (paramName in argv) {
+    return argv[paramName] || '';
+  }
+  return undefined;
+}
+exports.getProcessingFlag = getProcessingFlag;
+
+/*
+* Process command line parameters and create halping data sets
+*/
+if (!!argv._ && argv._.length > 1) {
+  argv.name = argv._[1]; //[0] - gulp command
+}
+const srcDirs = glob.sync(root('src', '**'), { })
+  .filter((f) => {
+    return fs.statSync(f).isDirectory();
+  }).map((d) => {
+    return d.substring(rootSrc().length + 1);
+  });
+const dirMap = {};
+srcDirs.forEach((d) => {
+  const lcPath = d.toLowerCase();
+  dirMap[lcPath] = d;
+});
+const entryDirs = srcDirs.filter((d) => {
+  const lst = d.split('/');
+  let ret = undefined;
+  if (d.indexOf(data.dir.common) === 0 && lst.length === 1) {
+    ret = true;
+  } else if (d.indexOf(data.dir.bundles) === 0 && lst.length === 2) {
+    const bundleName = getProcessingFlag('name');
+    if (bundleName === undefined || lst[1] === bundleName) {
+      ret = true;
+    }
+  }
+  return ret;
+});
+const entryMap = entryDirs.map((d) => {
+  const lst = d.split('/');
+  const bundle = lst.pop();
+  //Todo: handle .ts files!!!
+  const h = { bundle,
+    file: bundle + '/' + bundle + '.js',
+  };
+  return h;
+});
+data.entryMap = entryMap;
+//debugInspectAndExit(srcDirs);
+//debugInspectAndExit(entryDirs);
+//debugInspectAndExit(entryMap);
+//debugInspectAndExit(dirMap);
+
+function err(message) {
+  console.error(message);
+  process.exit(1);
+}
+
+function toPascalCase(val) {
+  return val.charAt(0).toUpperCase() + val.slice(1);
+}
+exports.toPascalCase = toPascalCase;
+
+function toCamelCase(val) {
+  return val.charAt(0).toLowerCase() + val.slice(1);
+}
+exports.toCamelCase = toCamelCase;
+
+function createGeneratorTemplateParams(dir, isBundle = false) {
+  let parent = getProcessingFlag('parent');
+  if (isBundle) {
+    parent = data.dir.bundles;
+  }
+  let name = getProcessingFlag('name');
+  if (!parent || !name) {
+    err('Inavlid parameters');
+  }
+  const lcName = name.toLowerCase();
+  //don't allow '-' in the name
+  if (name.split('-').length > 1) {
+    err('Name must not contain "-"');
+  }
+  name = name.replace(/\/$/, '').replace(/^\//, '');
+  parent = parent.replace(/\/$/, '').replace(/^\//, '');
+  parent = parent.toLowerCase().split('\\').join('/');
+  const parentChunks = parent.split('/');
+  //if parent doesn't contain 'common' or 'bundles' -> assume bundles
+  if (parentChunks[0] !== data.dir.common && parentChunks[0] !== data.dir.bundles) {
+    parentChunks.unshift(data.dir.bundles);
+    parent = data.dir.bundles + '/' + parent;
+  }
+  //bundle module must be under named bundle
+  if (!isBundle && parentChunks[0] !== data.dir.common && parentChunks.length === 1) {
+    err('Invalid location: ' + parent + '; specify full parent path (e.g bundles/test;  common)');
+  }
+  //parent must be within src dir map
+  if (!dirMap[parent] || (parentChunks[0] !== data.dir.common && parentChunks[0] !== data.dir.bundles)) {
+    err('Invalid parent: ' + parent);
+  }
+  //module with this name already exists
+  const fullName = parent + '/' + lcName;
+  if (dirMap[fullName]) {
+    err('Module already exists: ' + name);
+  }
+  //compile
+  if (isBundle) {
+    dir = '';
+  } else {
+    dir = dir + '/';
+  }
+  const destPath = parent + '/' + dir + lcName;
+  const isCommon = parentChunks[0] === data.dir.common;
+  if (!isCommon) {
+    //remove 'bundles' from the list
+    parentChunks.shift();
+  }
+  const result = {
+    name,
+    lcName,
+    cName: toCamelCase(name),
+    pName: toPascalCase(name),
+    dotName: parentChunks.join('.') + '.' + lcName,
+    dushName: parentChunks.join('-') + '-' + lcName,
+    destPath,
+  };
+
+  debugInspectAndExit(result);
+  return result;
+}
+exports.createGeneratorTemplateParams = createGeneratorTemplateParams;
+
 function rootNode(args) {
   args = Array.prototype.slice.call(arguments, 0);
   return root.apply(path, ['node_modules'].concat(args));
@@ -87,42 +250,11 @@ function rootConfig(args) {
 }
 exports.rootConfig = rootConfig;
 
-function rootSrc(args) {
-  args = Array.prototype.slice.call(arguments, 0);
-  return root.apply(path, [data.dir.src].concat(args));
-}
-exports.rootSrc = rootSrc;
-
 function rootAssets(args) {
   args = Array.prototype.slice.call(arguments, 0);
-  return root.apply(path, rootSrc(data.dir.assets), args);
+  return rootSrc.apply(path, [data.dir.assets].concat(args));
 }
 exports.rootAssets = rootAssets;
-
-function getProcessingFlag(paramName) {
-  if (paramName in yargs.args) {
-    return yargs.argv[paramName] || '';
-  }
-  return undefined;
-}
-exports.getProcessingFlag = getProcessingFlag;
-
-function prependExt(extensions, args) {
-  args = args || [];
-  if (!Array.isArray(args)) { args = [args]; }
-  return extensions.reduce((memo, val) => {
-    return memo.concat(val, args.map((prefix) => {
-      return prefix + val;
-    }));
-  }, ['']);
-}
-exports.prependExt = prependExt;
-
-function debugInspectAndExit(obj) {
-  console.log(util.inspect(obj, { colors: true, depth: 10, showHidden: false }));
-  process.exit(1);
-}
-exports.debugInspectAndExit = debugInspectAndExit;
 
 /*
 * Adjust environemnt. Application will have access to env through 'process.env'
