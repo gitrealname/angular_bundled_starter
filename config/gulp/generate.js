@@ -11,7 +11,7 @@ import template from 'gulp-template';
 
 import config from '../config';
 
-function createGeneratorTemplateParams(collectionName, targetIsDir, replaceFiles = false, isBundle = false) {
+function createGeneratorTemplateParams(collectionName, targetIsDir, replaceFiles, isBundle) {
   const data = config.data;
   let parent = config.getProcessingFlag('parent');
   if (isBundle) {
@@ -19,7 +19,7 @@ function createGeneratorTemplateParams(collectionName, targetIsDir, replaceFiles
   }
   let name = config.data.nameList[0];
   if (!parent || !name) {
-    config.error('Inavlid parameters');
+    config.error('Inavlid parameters', 'parent: ' + parent, 'name: ' + name);
   }
   const lcName = name.toLowerCase();
   //don't allow '-' in the name
@@ -104,7 +104,7 @@ function createGeneratorTemplateParams(collectionName, targetIsDir, replaceFiles
 }
 exports.createGeneratorTemplateParams = createGeneratorTemplateParams;
 
-function generate(generatorType, collectionName, targetIsDir, replaceFiles, isBundle = false) {
+function generate(generatorType, collectionName, targetIsDir, replaceFiles, isBundle) {
   if (config.getProcessingFlag('force') !== undefined) {
     replaceFiles = true;
   }
@@ -121,7 +121,7 @@ function generate(generatorType, collectionName, targetIsDir, replaceFiles, isBu
     .pipe(gulp.dest(destPath));
 }
 
-gulp.task('generate:bundle', ['generate:component'], () => {
+gulp.task('generate:bundle', () => {
   return generate('bundle', undefined, true, true, true);
 });
 

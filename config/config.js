@@ -23,7 +23,6 @@ function debugInspectAndExit(...args) {
   args.forEach((o) => {
     console.log(util.inspect(o, { colors: true, depth: 10, showHidden: false }));
   });
-  //console.log(util.inspect(obj, { colors: true, depth: 10, showHidden: false }));
   process.exit(1);
 }
 exports.debugInspectAndExit = debugInspectAndExit;
