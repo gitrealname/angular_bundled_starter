@@ -9,6 +9,10 @@ export default angular.module('<%= dotedFullName %>', [
 .config(($stateProvider) => {
   'ngInject';
 
+  /*
+  * ui-router component biding:
+  * See: https://github.com/angular-ui/ui-router/issues/2627
+  */
   $stateProvider.state('<%= dotedFullName %>', {
     component: '<%= cFullName %>',
     url: '/<%= lcName %>', // url is relative to parrent state's url
@@ -16,4 +20,4 @@ export default angular.module('<%= dotedFullName %>', [
   });
 })
 
-.component('<%= cFullName %>',<%= pName %>Component);
+.component('<%= cFullName %>', <%= pName %>Component);

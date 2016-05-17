@@ -16,6 +16,7 @@ import colors from 'colors';
 const argv = require('yargs')
   .alias('p', 'parent')
   .alias('n', 'name')
+  .alias('f', 'force')
   .argv;
 
 function debugInspectAndExit(...args) {

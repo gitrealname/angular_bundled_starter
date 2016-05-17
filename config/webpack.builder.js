@@ -115,7 +115,7 @@ function buildResolve() {
     *
     * See: http://webpack.github.io/docs/configuration.html#resolve-extensions
     */
-    extensions: ['', '.ts', '.js'],
+    extensions: ['', '.ts', '.js'], //Should they be included??? '.styl', '.less', '.css'],
 
     // Make sure root is src
     root: config.rootSrc(),

@@ -11,7 +11,7 @@ import template from 'gulp-template';
 
 import config from '../config';
 
-function createGeneratorTemplateParams(collectionName, targetIsDir, isBundle = false) {
+function createGeneratorTemplateParams(collectionName, targetIsDir, replaceFiles = false, isBundle = false) {
   const data = config.data;
   let parent = config.getProcessingFlag('parent');
   if (isBundle) {
@@ -68,7 +68,7 @@ function createGeneratorTemplateParams(collectionName, targetIsDir, isBundle = f
     config.error('Calculated parent directionry must exist: ' + parentDir);
   }
   //when target is a directory we can also check if it exists
-  if (targetIsDir && config.dirExists(config.rootSrc(destDir))) {
+  if (!replaceFiles && targetIsDir && config.dirExists(config.rootSrc(destDir))) {
     config.error('Module already exists: ' + destDir);
   }
 
@@ -104,13 +104,15 @@ function createGeneratorTemplateParams(collectionName, targetIsDir, isBundle = f
 }
 exports.createGeneratorTemplateParams = createGeneratorTemplateParams;
 
-function generate(generatorType, collectionName, targetIsDir, isBundle = false) {
-  const tmpl = createGeneratorTemplateParams(collectionName, targetIsDir, isBundle);
+function generate(generatorType, collectionName, targetIsDir, replaceFiles, isBundle = false) {
+  if (config.getProcessingFlag('force') !== undefined) {
+    replaceFiles = true;
+  }
+  const tmpl = createGeneratorTemplateParams(collectionName, targetIsDir, replaceFiles, isBundle);
 
   //config.debugInspectAndExit(tmpl);
 
-  const destPath = config.rootSrc('' + tmpl.destdir + '');
-  config.error(destPath);
+  const destPath = config.rootSrc(tmpl.destDir);
   return gulp.src(config.rootGenerator(generatorType + '/**/*.**'))
     .pipe(template(tmpl))
     .pipe(rename((p) => {
@@ -119,19 +121,19 @@ function generate(generatorType, collectionName, targetIsDir, isBundle = false) 
     .pipe(gulp.dest(destPath));
 }
 
-gulp.task('generate:component', () => {
-  return generate('component', 'components', true, false);
+gulp.task('generate:bundle', ['generate:component'], () => {
+  return generate('bundle', undefined, true, true, true);
 });
 
-gulp.task('generate:bundle', ['generate:component'], () => {
-  return generate('bundle', undefined, true, true);
+gulp.task('generate:component', () => {
+  return generate('component', 'components', true, false, false);
 });
 
 gulp.task('generate:service', () => {
-  return generate('service', 'services', false, false);
+  return generate('service', 'services', false, false, false);
 });
 
 gulp.task('generate:directive', () => {
   config.error('Directive generation is not yet implemented');
-  //return generate('directive', 'directives', true, false);
+  //return generate('directive', 'directives', true, false, false);
 });
