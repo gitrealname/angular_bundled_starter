@@ -17,18 +17,21 @@ export default angular.module('test', [
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
 
-  // #how-to-configure-your-server-to-work-with-html5mode
-  // @see: https://github.com/angular-ui/ui-router/wiki/Frequently-Asked-Questions
-  let url = '/test';
-  if (process.env.ONLY_BUNDLE) {
+  // Having '^' in front prevents double '/' when used along with other bundles
+  let url = '^/test';
+  if (process.env.ONLY_BUNDLE || process.env.ENV === 'production') {
+    /*
+    * none-html5mode by default. For details
+    * See: https://github.com/angular-ui/ui-router/wiki/Frequently-Asked-Questions
+    */
     $locationProvider.html5Mode(false).hashPrefix('!');
     $urlRouterProvider.otherwise('/');
-    url = '';
+    url = '/';
   }
 
   $stateProvider.state('test', {
     component: 'test',
-    url, // url is relative to parrent state's url
+    url,
     resolve: { },
     data: {
       title: 'test',
@@ -38,4 +41,18 @@ export default angular.module('test', [
 
 .component('test', TestComponent)
 
-.constant('config', config);
+.constant('config', config)
+
+.controller('Test', ['$state', ($state) => $state.go('/')]);
+
+/*
+*  To use this bundle as page entry point, make html similar to this example:
+   ...
+   <body ng-app="test" ng-strict-di ng-cloak ng-controller="Test">
+    <ui-view/>
+
+     <script type="text/javascript" src="/vendor.js"></script>
+     <script type="text/javascript" src="/common.js"></script>
+     <script type="text/javascript" src="/test.js"></script>
+   </body>
+*/
