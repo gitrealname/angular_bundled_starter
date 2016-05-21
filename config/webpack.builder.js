@@ -13,6 +13,7 @@ const config = require('./config');
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const ForkCheckerPlugin = require('awesome-typescript-loader').ForkCheckerPlugin;
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const DedupePlugin = require('webpack/lib/optimize/DedupePlugin');
@@ -27,9 +28,13 @@ const UglifyJsPlugin = require('webpack/lib/optimize/UglifyJsPlugin');
 
 
 function buildMetadata() {
-  return {
-    title: 'TBD',
+  const ret = {
+    title: 'Modular Angular-Webpack kit',
+    env: config.env,
+    baseUrl: '/',
+    ngModulesList: '\'' + Object.keys(config.data.entryMap).join('\', \'') + '\'',
   };
+  return ret;
 }
 module.exports.buildMetadata = buildMetadata;
 
@@ -97,10 +102,10 @@ function buildEntry() {
     return { };
   }
   const entries = { };
-  config.data.entryMap.forEach((h) => {
-    entries[h.bundle] = [config.rootSrc(h.file)];
+  Object.keys(config.data.entryMap).forEach((k) => {
+    const h = config.data.entryMap[k];
+    entries[k] = [config.rootSrc(h.script)];
   });
-
   return entries;
 }
 module.exports.buildEntry = buildEntry;
@@ -195,7 +200,7 @@ function buildLoaders() {
       exclude: [excRx, /node_modules/],
     },
 
-    { test: /\.png$/, loader: 'url-loader?limit=100000' },
+    { test: /\.png$/, loader: 'url-loader?limit=1024' },
     { test: /\.jpg$/, loader: 'file-loader' },
     { test: /\.css$/, loader: styleLoader(`?sourceMap&${m}`) },
     { test: /\.styl$/, loader: styleLoader(`?sourceMap&${m}!stylus?sourceMap`) },
@@ -209,10 +214,9 @@ function buildLoaders() {
       */
     { test: /\.json$/, loader: 'json' },
 
-    /* Raw loader support for *.html
-      * Returns file content as string
+    /* Html loader support for *.html
       *
-      * See: https://github.com/webpack/raw-loader
+      * See: https://github.com/webpack/html-loader
       */
     { test: /\.html$/, loader: 'html', exclude: [config.rootSrc('index.html')] },
 
@@ -355,11 +359,6 @@ function buildPlugins() {
   ];
 
   if (config.isEnvTest()) {
-    plst = plst.concat([
-      new DefinePlugin({
-        'config.data': JSON.stringify(config.data), //will be used in spec.bundle.js
-      }),
-    ]);
   } else {
     plst = plst.concat([
       /*
@@ -369,30 +368,19 @@ function buildPlugins() {
       * which changes every compilation.
       *
       * See: https://github.com/ampedandwired/html-webpack-plugin
+      * See: https://docs.omniref.com/js/npm/html-webpack-plugin/1.0.1
       */
       new HtmlWebpackPlugin({
-        template: 'html!./' + config.data.file.index,
-        inject: 'body',
-        hash: true,
+        template: './' + config.data.file.index,
+        filename: config.data.file.index,
+        inject: false, // scripts are manually injected 'body',
+        hash: false,
+        showErrors: true,
         chunksSortMode: 'dependency',
+        // requires HtmlWebpackHarddiskPlugin: alwaysWriteToDisk: true,
       }),
 
-      /*
-      * Plugin: CopyWebpackPlugin
-      * Description: Copy files and directories in webpack.
-      *
-      * Copies project static assets.
-      *
-      * See: https://www.npmjs.com/package/copy-webpack-plugin
-      */
-      new CopyWebpackPlugin([{
-        from: config.data.dir.assets,
-        to: 'assets',
-      }]),
-      new CopyWebpackPlugin([{
-        from: config.data.dir.data,
-        to: 'data',
-      }]),
+      //new HtmlWebpackHarddiskPlugin(),
 
       /*
       * Plugin: CommonsChunkPlugin
@@ -447,6 +435,27 @@ function buildPlugins() {
     ]);
   }
 
+  if (config.data.currentDest.length) {
+    plst = plst.concat([
+      /*
+      * Plugin: CopyWebpackPlugin
+      * Description: Copy files and directories in webpack.
+      *
+      * Copies project static assets.
+      *
+      * See: https://www.npmjs.com/package/copy-webpack-plugin
+      */
+      new CopyWebpackPlugin([{
+        from: config.data.dir.assets,
+        to: config.data.dir.assets,
+      }]),
+      new CopyWebpackPlugin([{
+        from: config.data.dir.data,
+        to: config.data.dir.data,
+      }]),
+    ]);
+  }
+
   return plst;
 }
 module.exports.buildPlugins = buildPlugins;
@@ -481,16 +490,31 @@ function buildDevServer() {
   if (!config.isEnvDev()) {
     return { };
   }
-  return {
+/*
+    const rewrites = Object.keys(config.data.entryMap)
+    .filter((k) => !config.data.entryMap[k].isCommon)
+    .map((k) => {
+      const from = '/\\/' + k + '/';
+      const to = '/' + config.data.entryMap[k].html;
+      return { from, to };
+    });
+*/
+  const cfg = {
+    hot: true,
     port: config.data.dev.port.port,
     host: config.data.dev.host,
-    historyApiFallback: true,
+    historyApiFallback: {
+      index: config.data.file.index,
+      //define bundle specific index pages
+      //rewrites,
+    },
     watchOptions: {
       aggregateTimeout: 300,
       poll: 1000,
     },
     outputPath: config.root(config.data.dest.dev),
   };
+  return cfg;
 }
 module.exports.buildDevServer = buildDevServer;
 

@@ -19,6 +19,17 @@ const argv = require('yargs')
   .alias('f', 'force')
   .argv;
 
+const src = 'src';
+const node = 'node_modules';
+const generator = 'generator';
+const bundles = 'bundles';
+const common = 'common';
+const assets = 'assets';
+const config = 'config';
+
+// Helper functions
+
+
 function debugInspectAndExit(...args) {
   args.forEach((o) => {
     console.log(util.inspect(o, { colors: true, depth: 10, showHidden: false }));
@@ -28,65 +39,6 @@ function debugInspectAndExit(...args) {
 exports.debugInspectAndExit = debugInspectAndExit;
 //debugInspectAndExit(argv);
 
-//config
-const data = {
-  //relative to root
-  dir: {
-    //relative to root
-    src: 'src',
-    generator: 'generator',
-    config: 'config',
-    //relative to src
-    assets: 'assets',
-    data: 'data',
-    common: 'common',
-    bundles: 'bundles',
-  },
-  file: {
-    index: 'src/index.html',
-  },
-  dest: {
-    prod: 'dest',
-    dev: 'dest.dev',
-    test: 'dest.test',
-    coverage: 'DEFINED BELOW!',
-  },
-  env: {
-    prod: 'production',
-    dev: 'development',
-    test: 'test',
-  },
-  build: {
-    release: 'release',
-    debug: 'debug',
-    test: 'test',
-  },
-  dev: {
-    host: 'localhost',
-    port: 3000,
-    url: 'DEFINED BELOW!',
-  },
-  test: {
-    port: 3666,
-  },
-  entryMap: {
-    'DEFINED BELOW!': 1,
-  },
-  nameList: ['DEFINED BELOW'], //list of names provided in command line by --name
-};
-data.dest.coverage = data.dest.test + '/coverage';
-data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
-exports.data = data;
-
-const env = {
-  ENV: data.env.prod,
-  BUILD: data.build.release,
-  WATCH: false, //is true when 'continues' testing/development is running
-  NAMES: ['DEFINED BELOW'], //list of --name param values
-};
-exports.env = env;
-
-// Helper functions
 function error(...arg) {
   console.log(colors.red('ERROR: ' + arg.join(' ')));
   gutil.beep();
@@ -116,7 +68,7 @@ info('Root directory: ', root());
 
 function rootSrc(args) {
   args = Array.prototype.slice.call(arguments, 0);
-  return root.apply(path, [data.dir.src].concat(args));
+  return root.apply(path, [src].concat(args));
 }
 exports.rootSrc = rootSrc;
 
@@ -125,66 +77,35 @@ function getProcessingFlag(paramName) {
     return argv._;
   }
   if (paramName in argv) {
-    return argv[paramName] || '';
+    return argv[paramName] || undefined;
   }
   return undefined;
 }
 exports.getProcessingFlag = getProcessingFlag;
 
-const names = getProcessingFlag('name') || [];
-data.nameList = [].concat(names);
-env.NAMES = data.nameList;
-
-/*
-* Process command line parameters and create halping data sets
-*/
-if (!!argv._ && argv._.length > 1) {
-  argv.name = argv._[1]; //[0] - gulp command
+function rootNode(args) {
+  args = Array.prototype.slice.call(arguments, 0);
+  return root.apply(path, [node].concat(args));
 }
-const srcDirs = glob.sync(root(data.dir.src, '**'), { })
-  .filter((f) => {
-    return fs.lstatSync(f).isDirectory();
-  }).map((d) => {
-    return d.substring(rootSrc().length + 1);
-  });
-const dirMap = {};
-srcDirs.forEach((d) => {
-  const lcPath = d.toLowerCase();
-  dirMap[lcPath] = d;
-});
-const entryDirs = srcDirs.filter((d) => {
-  const lst = d.split('/');
-  let ret = undefined;
-  if (d.indexOf(data.dir.common) === 0 && lst.length === 1) {
-    ret = true;
-  } else if (d.indexOf(data.dir.bundles) === 0 && lst.length === 2) {
-    if (!data.nameList.length || names.indexOf(lst[1]) >= 0) {
-      ret = true;
-    }
-  }
-  return ret;
-});
-const entryMap = entryDirs.map((d) => {
-  const lst = d.split('/');
-  const bundle = lst.pop();
-  //Todo: handle .ts files!!!
-  const h = {
-    bundle,
-    file: bundle + '/' + bundle + '.js',
-    isCommon: false,
-  };
-  if (h.bundle === data.dir.common) {
-    h.isCommon = true;
-  } else {
-    h.file = data.dir.bundles + '/' + h.file;
-  }
-  return h;
-});
-data.entryMap = entryMap;
-//debugInspectAndExit(srcDirs);
-//debugInspectAndExit(entryDirs);
-//debugInspectAndExit(entryMap);
-//debugInspectAndExit(dirMap);
+exports.rootNode = rootNode;
+
+function rootGenerator(args) {
+  args = Array.prototype.slice.call(arguments, 0);
+  return root.apply(path, [generator].concat(args));
+}
+exports.rootGenerator = rootGenerator;
+
+function rootConfig(args) {
+  args = Array.prototype.slice.call(arguments, 0);
+  return root.apply(path, [config].concat(args));
+}
+exports.rootConfig = rootConfig;
+
+function rootAssets(args) {
+  args = Array.prototype.slice.call(arguments, 0);
+  return rootSrc.apply(path, [assets].concat(args));
+}
+exports.rootAssets = rootAssets;
 
 function fileExists(fileName) {
   try {
@@ -206,49 +127,217 @@ function dirExists(dirName) {
 }
 exports.dirExists = dirExists;
 
-function toPascalCase(val) {
+//string convertion functions
+function firstCharToUpperCase(val) {
   return val.charAt(0).toUpperCase() + val.slice(1);
 }
-exports.toPascalCase = toPascalCase;
+exports.firstCharToUpperCase = firstCharToUpperCase;
 
-function toCamelCase(val) {
+function firstCharToLowerCase(val) {
   return val.charAt(0).toLowerCase() + val.slice(1);
 }
-exports.toCamelCase = toCamelCase;
+exports.firstCharToLowerCase = firstCharToLowerCase;
 
-function rootNode(args) {
-  args = Array.prototype.slice.call(arguments, 0);
-  return root.apply(path, ['node_modules'].concat(args));
+function dushedNameToChunks(val) {
+  const s = val.split('-');
+  return s;
 }
-exports.rootNode = rootNode;
+exports.dushedNameToChunks = dushedNameToChunks;
 
-function rootGenerator(args) {
-  args = Array.prototype.slice.call(arguments, 0);
-  return root.apply(path, [data.dir.generator].concat(args));
+function camelCaseNameToLowerCaseChunks(val) {
+  let s = val.replace(/([A-Z]+[0-9]?)(?=[A-Z\.\-]|$)/g, (x) => { //AAABcTestDDD => _aaa_BcTest_ddd_
+    return '_' + x.toLowerCase() + '_';
+  });
+  s = s.replace(/([A-Z])/g, (x) => '_' + x.toLowerCase()); //_aaa_BcTest_ddd_ => _aaa__bc_test_ddd_
+  s = s.replace(/^_+/, '').replace(/_+$/, '').replace(/_+/g, '_'); //_aaa__bc_test_ddd_ => aaa_bc_test_ddd
+  s = s.split('_');
+  return s;
 }
-exports.rootGenerator = rootGenerator;
+exports.camelCaseNameToLowerCaseChunks = camelCaseNameToLowerCaseChunks;
 
-function rootConfig(args) {
-  args = Array.prototype.slice.call(arguments, 0);
-  return root.apply(path, [data.dir.config].concat(args));
-}
-exports.rootConfig = rootConfig;
+const camelCase = 1;
+exports.camelCase = camelCase; //first work lower case and the rest are capCase
+const capCase = 2;
+exports.capCase = capCase; //fist letter of each word is capitalized
+const lowerCase = 3;
+exports.lowerCase = lowerCase; //all letters in lower case
 
-function rootAssets(args) {
-  args = Array.prototype.slice.call(arguments, 0);
-  return rootSrc.apply(path, [data.dir.assets].concat(args));
+function looseNameToXCase(val, caseType, dropSuffix = true) {
+  val = val.replace('.', '-');
+  val = dushedNameToChunks(val);
+  val = val.map((v) => firstCharToUpperCase(v));
+  if (dropSuffix) {
+    let last = val.pop();
+    last = last.replace(/(service|directive|component|interceptor|controller|filter)$/i, '');
+    if (last.length) {
+      val.push(last);
+    }
+  }
+  let str = val.join('');
+  if (caseType === camelCase) {
+    str = firstCharToLowerCase(str);
+  } else if (caseType === lowerCase) {
+    str = str.toLowerCase();
+  }
+  return str;
 }
-exports.rootAssets = rootAssets;
+exports.looseNameToXCase = looseNameToXCase;
+
+//config
+const data = {
+  //relative to root
+  dir: {
+    //relative to root
+    src,
+    generator,
+    config,
+    //relative to src
+    assets,
+    data: 'data',
+    common,
+    bundles,
+  },
+  file: {
+    index: 'index.html',
+  },
+  dest: {
+    prod: 'dest.prod',
+    dev: '',
+    test: '',
+    coverage: 'test.coverage',
+  },
+  env: {
+    prod: 'production',
+    dev: 'development',
+    test: 'test',
+  },
+  build: {
+    release: 'release',
+    debug: 'debug',
+    test: 'test',
+  },
+  dev: {
+    host: 'localhost',
+    port: 3000,
+    url: 'DEFINED BELOW!',
+  },
+  test: {
+    port: 3666,
+  },
+  entryMap: {
+    'DEFINED BELOW!': 1,
+  },
+  currentDest: '< one of the data.dest, determined based on env>',
+};
+exports.data = data;
+
+const env = {
+  ENV: data.env.prod,
+  BUILD: data.build.release,
+  WATCH: false, //is true when 'continues' testing/development is running
+  ONLY_BUNDLE: '<flag, is set to true if only one bundle (common is not counted) is specified>',
+  BUNDLES: '<explicetly specified (by --name param) list of bundles>',
+  BUNDLE_ENTRIES: '<all resolved bundles excluding common>',
+};
+exports.env = env;
+
+data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
+
+/*
+* Process command line parameters and create halping data sets
+*/
+const names = [].concat(getProcessingFlag('name') || []);
+//--name xyz-special-service --name TestAbout => [xyzSpecialService, testAbout]
+const formalNames = names.map((n) => looseNameToXCase(n, camelCase, false));
+//--name aa-bb --name AbCd --name xyzAbcService => [aaBb, abCd, xyzAbc]
+const camelCaseNormalizedNames = names.map((n) => looseNameToXCase(n, camelCase));
+//--name aa-bb --name ABCd --name xyzABCService => [aa-bb, ab-cd, xyz-abc]
+const fileNames = camelCaseNormalizedNames.map((v) => camelCaseNameToLowerCaseChunks(v).join('-'));
+
+//all explicetly listed bundle dir names converted according to fileName convention.
+const explicitBundleDirNames = fileNames.filter((v) => dirExists(rootSrc(bundles, v)) || v.toLowerCase() === 'common');
+env.BUNDLES = explicitBundleDirNames;
+
+let nonCommonBundleCount = 0;
+let masterBundleCamelCaseNormalizedName = explicitBundleDirNames.reduce((prev, v) => {
+  if (v.toLowerCase() === common) {
+    return prev;
+  }
+  nonCommonBundleCount++;
+  return (!!prev) ? prev : v;
+}, '');
+masterBundleCamelCaseNormalizedName = looseNameToXCase(masterBundleCamelCaseNormalizedName, camelCase);
+//is only bundle?
+env.ONLY_BUNDLE = nonCommonBundleCount === 1;
+
+//prepare additional constants for generator
+const parents = [].concat(getProcessingFlag('parent') || []);
+const parentChunks = parents.length ? parents[0].split(/[\/\\]+/) : [];
+const parentDirNameChunks = parentChunks.map((v) => camelCaseNameToLowerCaseChunks(looseNameToXCase(v, camelCase)).join('-'));
+const parentDirNameChunksReduced = parentDirNameChunks.filter((v) => v !== 'components' && v !== bundles);
+
+/*
+* Prepare webpack Entry map
+*/
+
+//get all dirs (relative to 'src' directory)
+const srcDirs = glob.sync(rootSrc('**'), { })
+  .filter((f) => {
+    return fs.lstatSync(f).isDirectory();
+  }).map((d) => {
+    return d.substring(rootSrc().length + 1);
+  });
+
+//create entry map: common always included, the rest is determined by --name param
+//and existance of the entry file (.js or .ts)
+const entryMap = {}; //{<key> => {file: <entry_file>}}
+srcDirs.filter((d) => {
+  const lst = d.split('/');
+  let ret = false;
+  let fileSuffix = '';
+  let key;
+  let isCommon = false;
+  if (d.indexOf(common) === 0 && lst.length === 1) {
+    fileSuffix = d + '/' + d;
+    isCommon = true;
+    key = common;
+    ret = true;
+  } else if (d.indexOf(bundles) === 0 && lst.length === 2) {
+    if (!fileNames.length || fileNames.indexOf(lst[1]) >= 0) {
+      fileSuffix = d + '/' + lst[1];
+      key = looseNameToXCase(lst[1], camelCase);
+      ret = true;
+    }
+  }
+  if (ret) {
+    const extList = ['.js', '.ts'];
+    const entryExt = extList.filter((v) => fileExists(rootSrc(fileSuffix + v)));
+    if (!entryExt.length) {
+      ret = false;
+    } else {
+      entryMap[key] = { script: fileSuffix + entryExt[0], html: fileSuffix + '.html', isCommon };
+    }
+  }
+  return ret;
+});
+data.entryMap = entryMap;
+
+env.BUNDLE_ENTRIES = Object.keys(entryMap).filter((v) => v !== common);
+
+//debugInspectAndExit(dirMap);
+//debugInspectAndExit(srcDirs);
+//debugInspectAndExit(entryMap);
+
 
 /*
 * Adjust environemnt. Application will have access to env through 'process.env'
 */
-exports.setEnvProdRelease = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod; env.BUILD = data.build.release; };
-exports.setEnvProdDebug = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod; env.BUILD = data.build.debug; };
-exports.setEnvDev = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'development'; env.BUILD = 'debug'; env.WATCH = true; };
-exports.setEnvDevWatch = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'development'; env.WATCH = true; };
-exports.setEnvTest = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'test'; env.BUILD = 'test'; env.WATCH = false; };
-exports.setEnvTestWatch = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'test'; env.BUILD = 'test'; env.WATCH = true; };
+exports.setEnvProdRelease = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod; env.BUILD = data.build.release; data.currentDest = data.dest.prod; };
+exports.setEnvProdDebug = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod; env.BUILD = data.build.debug; data.currentDest = data.dest.prod; };
+exports.setEnvDev = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'development'; env.BUILD = 'debug'; env.WATCH = true; data.currentDest = data.dest.dev; };
+exports.setEnvDevWatch = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'development'; env.WATCH = true; data.currentDest = data.dest.dev; };
+exports.setEnvTest = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'test'; env.BUILD = 'test'; env.WATCH = false; data.currentDest = data.dest.test; };
+exports.setEnvTestWatch = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'test'; env.BUILD = 'test'; env.WATCH = true; data.currentDest = data.dest.test; };
 
 exports.isEnvProd = () => { return env.ENV === data.env.prod; };
 exports.isEnvDev = () => { return env.ENV === data.env.dev; };
@@ -257,4 +346,5 @@ exports.isBuildRelease = () => { return env.BUILD === data.build.release; };
 exports.isBuildDebug = () => { return env.BUILD === data.build.debug; };
 exports.isBuildTest = () => { return env.BUILD === data.build.test; };
 exports.isWatched = () => { return env.WATCH === true; };
+
 

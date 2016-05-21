@@ -13,6 +13,9 @@ export default angular.module('test.about', [
     component: 'testAbout',
     url: '/about', // url is relative to parrent state's url
     resolve: { },
+    data: {
+      title: 'about',
+    },
   });
 })
 

@@ -9,9 +9,11 @@ import del from 'del';
 import config from '../config';
 
 function cleanList() {
-  return Object.keys(config.data.dest).map((key) => {
-    return config.data.dest[key];
-  });
+  return Object.keys(config.data.dest)
+    .filter((k) => config.data.dest[k].trim().length)
+    .map((k) => {
+      return config.root(config.data.dest[k]);
+    });
 }
 
 gulp.task('clean', 'remove intermmediate files', () => {

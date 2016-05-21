@@ -26,7 +26,7 @@ gulp.task('watch', 'run dev server with "hot replacement"', () => {
   config.setEnvDev();
   const cfg = webpackBuilder.buildConfig();
   prependEntriesWithHotMiddleware(cfg.entry);
-  //config.debugInspectAndExit(cfg.entry);
+  //config.debugInspectAndExit(cfg);
   const wp = webpack(cfg);
   browserSync({
     open: false,

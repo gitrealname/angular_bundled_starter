@@ -16,18 +16,24 @@ export default angular.module('test', [
 
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
+
   // #how-to-configure-your-server-to-work-with-html5mode
   // @see: https://github.com/angular-ui/ui-router/wiki/Frequently-Asked-Questions
-  $locationProvider.html5Mode(true).hashPrefix('!');
+  let url = '/test';
+  if (process.env.ONLY_BUNDLE) {
+    $locationProvider.html5Mode(false).hashPrefix('!');
+    $urlRouterProvider.otherwise('/');
+    url = '';
+  }
 
-  $urlRouterProvider.otherwise('/');
-  $urlRouterProvider.when('/', '/test');
-
-  $stateProvider
-    .state('test', {
-      url: '/test',
-      template: '<test>Loading</test>',
-    });
+  $stateProvider.state('test', {
+    component: 'test',
+    url, // url is relative to parrent state's url
+    resolve: { },
+    data: {
+      title: 'test',
+    },
+  });
 })
 
 .component('test', TestComponent)

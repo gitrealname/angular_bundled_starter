@@ -28,7 +28,7 @@ const context = require.context('../src', true, /\.spec\.(ts|js)/);
 // by --name command line param (which is stored in process.env.PARAMS)
 // Accept all files if --name was not specified
 const list = context.keys().filter((val) => {
-  if (!process.env.NAMES.length) {
+  if (!process.env.BUNDLES.length) {
     return true;
   }
   // remove leading './'
@@ -39,7 +39,7 @@ const list = context.keys().filter((val) => {
     bundle = chunks[1];
   }
   //search for bundle in the name list
-  return process.env.NAMES.indexOf(bundle) >= 0;
+  return process.env.BUNDLES.indexOf(bundle) >= 0;
 });
 
 /*DEBUG:

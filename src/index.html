@@ -2,17 +2,60 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>LTSS About module</title>
+    <title><%= webpackConfig.metadata.title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="description" content="LTSS About module ">
+    <meta name="description" content="<%= webpackConfig.metadata.title %>">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <base href="/">
+    <base href="<%= webpackConfig.metadata.baseUrl %>">
 
   </head>
-  <body ng-app="b1" ng-strict-di ng-cloak>
-    <ui-view/>
+  <body ng-app="app" ng-strict-di ng-cloak>
+
+    <app>
+      Loading...
+    </app>
+
+    <!-- Load bundles here -->
+    <%= '<script type="text/javascript" src="' + htmlWebpackPlugin.files.js.join('"></script><script type="text/javascript" src="') + '"></script>' %>
+
+    <!-- Top level entry point -->
+    <script>
+      const _rootStateName = '_root_';
+      angular.module('app', ['ui.router', <%= webpackConfig.metadata.ngModulesList %>])
+      .component('app', {
+        template: [
+          '<div ng-show="!$state.current.name || $state.current.name == _rootStateName">',
+            <% for (let i=0; i < webpackConfig.metadata.env.BUNDLE_ENTRIES.length; i++) { %>
+              '<span><a ui-sref="<%= webpackConfig.metadata.env.BUNDLE_ENTRIES[i] %>"> <%= webpackConfig.metadata.env.BUNDLE_ENTRIES[i] %></a></span>&nbsp|',
+            <% } %>
+            '<hr/>',
+          '</div>',
+          '<ui-view>',
+          '<center> <h1>Pick the bundle</h1> </center>',
+          '</ui-view>',
+        ].join('\n'),
+        restrict: 'E',
+        controller: ['$scope', '$state', function($scope, $state) {
+          $scope.$state = $state;
+        }],
+      })
+      .config(['$locationProvider', '$urlRouterProvider', '$stateProvider', ($locationProvider, $urlRouterProvider, $stateProvider) => {
+          if (!<%= webpackConfig.metadata.env.ONLY_BUNDLE %>) {
+            $locationProvider.html5Mode(false).hashPrefix('!');
+            $urlRouterProvider.otherwise('/');
+            $stateProvider.state(_rootStateName, {
+              component: 'app',
+              url: '',
+              data: {
+                title: '<%= webpackConfig.metadata.title %>',
+              },
+            });
+          }
+      }]);
+    </script>
+
   </body>
 </html>
