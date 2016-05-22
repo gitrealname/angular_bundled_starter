@@ -501,6 +501,7 @@ function buildDevServer() {
 */
   const cfg = {
     hot: true,
+    inline: true,
     port: config.data.dev.port.port,
     host: config.data.dev.host,
     historyApiFallback: {

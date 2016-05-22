@@ -20,7 +20,7 @@ export class TestController {
   activate() {
     console.log(`controler '${this.name}' activated.`);
   }
-}
+} // TestController
 
 export default {
   restrict: 'E',

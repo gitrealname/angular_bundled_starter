@@ -19,8 +19,10 @@ import config from '../config';
 function prependEntriesWithHotMiddleware(entry) {
   Object.keys(entry).forEach((key) => {
     // 'webpack-hot-middleware/client?reload=true' required to make HRM working
-    // it responsible for all this webpack magic
-    entry[key].unshift('webpack-hot-middleware/client?reload=true');
+    // it responsible for all this webpack magic.
+    //NOTE: magic doesn't seem to be working correctly with angular
+    //  see index.html for logic that forces reload after change.
+    entry[key].push('webpack-hot-middleware/client?reload=true');
   });
 }
 
@@ -29,6 +31,9 @@ gulp.task('watch', 'run dev server with "hot replacement"', () => {
   const webpackConfig = webpackBuilder.buildConfig();
   //attemp to find out why page reload doesn't happen: const webpackConfig = require('../webpack.dev.config');
   prependEntriesWithHotMiddleware(webpackConfig.entry);
+
+  //config.debugInspectAndExit(webpackConfig);
+
   const webpackCompiler = webpack(webpackConfig);
 
   browserSync({

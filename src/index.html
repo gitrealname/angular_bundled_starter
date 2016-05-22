@@ -55,5 +55,26 @@
           }
       }]);
     </script>
+    <script>
+      // When webpack hot middleware reloads modules, page doesn't refresh.
+      // The following will force page to reload (based on info from hot-middleware client.js):
+      (function() {
+        var source = new window.EventSource('/__webpack_hmr');
+        source.onmessage = function(event) {
+          if (event.data == "\uD83D\uDC93") {
+            return;
+          }
+          try {
+            var data = JSON.parse(event.data);
+            if(data.action === 'built') {
+              console.warn("Reloading page...");
+              window.location.reload();
+            }
+          } catch(ex) {
+            console.warn("Invalid HMR message: " + event.data + "\n" + ex);
+          }
+        }
+      })();
+    </script>
   </body>
 </html>
