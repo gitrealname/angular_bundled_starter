@@ -19,7 +19,7 @@ export default angular.module('test', [
 
   // Having '^' in front prevents double '/' when used along with other bundles
   let url = '^/test';
-  if (process.env.ONLY_BUNDLE || process.env.ENV === 'production') {
+  if (process.env.ONLY_BUNDLE || process.env.ENV === process.env.CONST.PROD_ENV) {
     /*
     * none-html5mode by default. For details
     * See: https://github.com/angular-ui/ui-router/wiki/Frequently-Asked-Questions
@@ -29,6 +29,10 @@ export default angular.module('test', [
     url = '/';
   }
 
+  /*
+  * for details on ui-router component router
+  * See: https://github.com/angular-ui/ui-router/issues/2627
+  */
   $stateProvider.state('test', {
     component: 'test',
     url,

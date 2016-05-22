@@ -17,6 +17,8 @@ const argv = require('yargs')
   .alias('p', 'parent')
   .alias('n', 'name')
   .alias('f', 'force')
+  .alias('o', 'open')
+  .alias('s', 'server')
   .argv;
 
 const src = 'src';
@@ -24,7 +26,8 @@ const node = 'node_modules';
 const generator = 'generator';
 const bundles = 'bundles';
 const common = 'common';
-const assets = 'assets';
+const assets = 'Content';
+const devData = 'dev.server.data';
 const config = 'config';
 
 // Helper functions
@@ -193,7 +196,7 @@ const data = {
     config,
     //relative to src
     assets,
-    data: 'data',
+    devData,
     common,
     bundles,
   },
@@ -239,6 +242,11 @@ const env = {
   BUNDLES: '<explicetly specified (by --name param) list of bundles>',
   BUNDLE_ENTRIES: '<all resolved bundles excluding common>',
   PORT: '<server port>',
+  CONST: {
+    TEST_ENV: data.env.test,
+    PROD_ENV: data.env.prod,
+    DEV_ENV: data.env.dev,
+  },
 };
 exports.env = env;
 

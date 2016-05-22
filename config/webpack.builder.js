@@ -450,8 +450,8 @@ function buildPlugins() {
         to: config.data.dir.assets,
       }]),
       new CopyWebpackPlugin([{
-        from: config.data.dir.data,
-        to: config.data.dir.data,
+        from: config.data.dir.devData,
+        to: config.data.dir.devData,
       }]),
     ]);
   }

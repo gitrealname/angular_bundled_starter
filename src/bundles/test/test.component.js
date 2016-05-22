@@ -2,23 +2,32 @@ import './test.styl';
 import template from './test.html';
 
 export class TestController {
-  constructor() {
+  constructor($http) {
     'ngInject';
-    const vm = this;
+    this.$http = $http;
 
     //public
-    vm.name = 'test';
+    this.name = 'test';
+    this.httpName = 'loading...';
 
     //private
-    vm.creationTime = new Date();
+    this.creationTime = new Date();
 
     //initialize
-    vm.activate();
+    this.activate();
   }
 
   // Methods
   activate() {
+    if (process.env.ENV === process.env.CONST.TEST_ENV) {
+      return;
+    }
     console.log(`controler '${this.name}' activated.`);
+    this.$http.get('/dev.server.data/test.json').then((response) => {
+      this.httpName = response.data.testResponse.value1;
+    }).catch((err) => {
+      this.httpName = err;
+    });
   }
 } // TestController
 
