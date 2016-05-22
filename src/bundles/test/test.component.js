@@ -4,7 +4,21 @@ import template from './test.html';
 export class TestController {
   constructor() {
     'ngInject';
-    this.name = 'test';
+    const vm = this;
+
+    //public
+    vm.name = 'test';
+
+    //private
+    vm.creationTime = new Date();
+
+    //initialize
+    vm.activate();
+  }
+
+  // Methods
+  activate() {
+    console.log(`controler '${this.name}' activated.`);
   }
 }
 

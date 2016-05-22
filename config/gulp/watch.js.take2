@@ -1,0 +1,58 @@
+/*eslint prefer-template: 0*/
+/*eslint max-len: 0*/
+
+/*
+* See: https://www.npmjs.com/package/gulp-help
+*/
+const gulp = require('gulp-help')(require('gulp'));
+import webpack from 'webpack';
+import webpackBuilder from '../webpack.builder.js';
+import sourcemaps from 'gulp-sourcemaps';
+import WebpackDevServer from 'webpack-dev-server';
+import stream from 'webpack-stream';
+
+import config from '../config';
+
+function prependEntriesWithHotMiddleware(entry) {
+  Object.keys(entry).forEach((key) => {
+    // 'webpack-hot-middleware/client?reload=true' required to make HRM working
+    // it responsible for all this webpack magic
+    entry[key].unshift('"webpack-dev-server/client?http://localhost:3000/');
+  });
+}
+
+config.setEnvDev();
+const webpackConfig = webpackBuilder.buildConfig();
+
+gulp.task('watch:webpack', () => {
+  const task = gulp.src(['src/**/*']) // gulp looks for all source files under specified path
+    .pipe(sourcemaps.init()) // creates a source map which would be very helpful for debugging by maintaining the actual source code structure
+    .pipe(stream(webpackConfig)) // blend in the webpack config into the source files
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest(config.data.dest.currentDest));
+  return task;
+});
+
+gulp.task('watch:webpack-dev-server', (cb) => {
+  // Start a webpack-dev-server
+  new WebpackDevServer(webpack(webpackConfig), {
+    publicPath: '/' + webpackConfig.output.publicPath,
+    hot: true,
+    stats: {
+      colors: true,
+    },
+  })
+  .listen(config.data.dev.port, config.data.dev.host, (err) => {
+    if (err) {
+      throw new gutil.PluginError("webpack-dev-server", err);
+    }
+    config.info('[webpack-dev-server]', 'http://', config.data.dev.host, ':', config.data.dev.port);
+  });
+});
+
+gulp.task('watch:changes', ['watch:webpack'], () => {
+  const task = gulp.watch(['!src/**/*.(spec|e2e).*']);
+  return task;
+});
+
+gulp.task('watch', 'run dev server with "hot replacement"', ['watch:webpack-dev-server', 'watch:changes']);

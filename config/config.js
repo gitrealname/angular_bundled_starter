@@ -201,7 +201,7 @@ const data = {
     index: 'index.html',
   },
   dest: {
-    prod: 'dest.prod',
+    prod: 'prod.dest',
     dev: '',
     test: '',
     coverage: 'test.coverage',
@@ -238,10 +238,12 @@ const env = {
   ONLY_BUNDLE: '<flag, is set to true if only one bundle (common is not counted) is specified>',
   BUNDLES: '<explicetly specified (by --name param) list of bundles>',
   BUNDLE_ENTRIES: '<all resolved bundles excluding common>',
+  PORT: '<server port>',
 };
 exports.env = env;
 
 data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
+env.PORT = data.dev.port;
 
 /*
 * Process command line parameters and create halping data sets

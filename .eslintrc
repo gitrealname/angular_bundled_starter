@@ -22,6 +22,7 @@
         "spaced-comment": 0,
         "global-require": 1,
         "no-trailing-spaces": 0,
+        "no-use-before-define": 0,
         "quotes": ["error", "single", {"allowTemplateLiterals": true}]
     }
 }

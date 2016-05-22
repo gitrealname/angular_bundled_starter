@@ -48,7 +48,7 @@ function buildOutput() {
   let publicPath = '';
   let suffix = '.';
   if (config.isEnvDev()) {
-    path = config.root(config.data.dest.dev);
+    path = config.rootSrc();
     publicPath = '/';
   }
   if (config.isBuildRelease()) {
@@ -120,10 +120,10 @@ function buildResolve() {
     *
     * See: http://webpack.github.io/docs/configuration.html#resolve-extensions
     */
-    extensions: ['', '.ts', '.js'], //Should they be included??? '.styl', '.less', '.css'],
+    extensions: ['', '.ts', '.js', '.styl', '.less', '.css'], //Should they be included??? '.styl', '.less', '.css'],
 
     // Make sure root is src
-    root: config.rootSrc(),
+    root: [config.rootSrc()],
 
     // remove other default values
     modulesDirectories: ['node_modules'],

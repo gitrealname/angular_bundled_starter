@@ -12,7 +12,7 @@
     <base href="<%= webpackConfig.metadata.baseUrl %>">
 
   </head>
-  <body ng-app="app" ng-strict-di ng-cloak ng-controller="App">
+  <body ng-app="app" ng-strict-di ng-cloak>
     <ui-view/>
 
     <!-- Load bundles here -->
@@ -22,9 +22,6 @@
     <script>
       const rootStateName = 'app';
       angular.module('app', ['ui.router', <%= webpackConfig.metadata.ngModulesList %>])
-      .controller('App', ['$state', function($state) {
-        $state.go('/');
-      }])
       .component('app', {
         template: [
           '<div ng-show="!$state.current.name || $state.current.name == rootStateName">',
@@ -56,11 +53,7 @@
               },
             });
           }
-      }])
-      .run(['$rootScope', function($rootScope) {
-        $rootScope.$on("$stateChangeError", console.log.bind(console));
       }]);
     </script>
-
   </body>
 </html>

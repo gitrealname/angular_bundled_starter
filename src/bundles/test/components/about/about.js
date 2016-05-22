@@ -11,7 +11,7 @@ export default angular.module('test.about', [
 
   $stateProvider.state('test.about', {
     component: 'testAbout',
-    url: '/about', // url is relative to parrent state's url
+    url: '^/about', // url is relative to parrent state's url
     resolve: { },
     data: {
       title: 'about',

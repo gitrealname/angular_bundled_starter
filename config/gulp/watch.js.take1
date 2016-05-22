@@ -1,5 +1,4 @@
 /*eslint prefer-template: 0*/
-/*eslint max-len: 0*/
 
 /*
 * See: https://www.npmjs.com/package/gulp-help
@@ -13,39 +12,44 @@ import webpackHotMiddelware from 'webpack-hot-middleware';
 import colorsSupported from 'supports-color';
 import historyApiFallback from 'connect-history-api-fallback';
 
-
 import config from '../config';
 
 function prependEntriesWithHotMiddleware(entry) {
   Object.keys(entry).forEach((key) => {
     // 'webpack-hot-middleware/client?reload=true' required to make HRM working
     // it responsible for all this webpack magic
-    entry[key].unshift('webpack-hot-middleware/client?reload=true');
+    entry[key].unshift('webpack-hot-middleware/client');
   });
 }
 
 gulp.task('watch', 'run dev server with "hot replacement"', () => {
   config.setEnvDev();
-  const webpackConfig = webpackBuilder.buildConfig();
-  //attemp to find out why page reload doesn't happen: const webpackConfig = require('../webpack.dev.config');
-  prependEntriesWithHotMiddleware(webpackConfig.entry);
-  const webpackCompiler = webpack(webpackConfig);
-
+  const cfg = webpackBuilder.buildConfig();
+  prependEntriesWithHotMiddleware(cfg.entry);
+  //config.debugInspectAndExit(cfg);
+  const wp = webpack(cfg);
   browserSync({
-    port: config.data.dev.port,
     open: false,
-    server: { baseDir: config.rootSrc() },
+    port: config.data.dev.port,
+    server: {
+      baseDir: config.rootSrc(),
+    },
     middleware: [
       historyApiFallback(),
-      webpackDevMiddelware(webpackCompiler, {
+      webpackDevMiddelware(wp, {
         stats: {
           colors: colorsSupported,
           chunks: false,
           modules: false,
         },
-        publicPath: webpackConfig.output.publicPath,
+        publicPath: cfg.output.publicPath,
       }),
-      webpackHotMiddelware(webpackCompiler),
+      webpackHotMiddelware(wp, {
+        hot: true,
+        quiet: false, //disable all console logging
+        noInfo: false, //Set to true to disable informational console logging.
+        reload: true,
+      }),
     ],
   });
 });

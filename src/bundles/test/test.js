@@ -41,14 +41,12 @@ export default angular.module('test', [
 
 .component('test', TestComponent)
 
-.constant('config', config)
-
-.controller('Test', ['$state', ($state) => $state.go('/')]);
+.constant('config', config);
 
 /*
 *  To use this bundle as page entry point, make html similar to this example:
    ...
-   <body ng-app="test" ng-strict-di ng-cloak ng-controller="Test">
+   <body ng-app="test" ng-strict-di ng-cloak>
     <ui-view/>
 
      <script type="text/javascript" src="/vendor.js"></script>
