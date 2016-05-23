@@ -23,6 +23,7 @@ const argv = require('yargs')
   .alias('f', 'force')
   .alias('o', 'open')
   .alias('s', 'server')
+  .alias('r', 'root')
   .argv;
 
 /*
@@ -59,6 +60,13 @@ const data = {
     dev: '',
     test: '',
     coverage: 'test.coverage',
+  },
+  publish: {
+    root: '../ngWebpackMvc4/ngWebpackMvc4', //relative to root or absolute path
+    //relative to publish root
+    content: 'Content',
+    styles: 'Content/app',
+    scripts: 'Scripts/app',
   },
   env: {
     prod: 'production',
@@ -136,7 +144,6 @@ function warn(...arg) {
 }
 exports.warn = warn;
 
-
 const rootPath = path.resolve(__dirname, '..');
 
 function root(args) {
@@ -151,6 +158,21 @@ function rootSrc(args) {
   return root.apply(path, [src].concat(args));
 }
 exports.rootSrc = rootSrc;
+
+function rootPublish(args) {
+  args = Array.prototype.slice.call(arguments, 0);
+  let dir = path.resolve('', data.publish.root);
+  if (!dirExists(dir)) {
+    dir = root(data.publish.root);
+    if (!dirExists(dir)) {
+      warn('Unable to resolve path "' + data.publish.root + '"');
+      error('Publishing root directory must exist');
+    }
+  }
+  const ret = path.join.apply(path, [dir].concat(args));
+  return ret;
+}
+exports.rootPublish = rootPublish;
 
 function getProcessingFlag(paramName) {
   if (paramName === undefined) {

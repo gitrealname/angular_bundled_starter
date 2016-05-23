@@ -17,12 +17,10 @@ import runSequence from 'run-sequence';
 import config from '../config';
 import webpackBuilder from '../webpack.builder.js';
 
-let webpackStatsLogType = 2;
-
-function webpackStats(callback) {
+function webpackStats(logMode, callback) {
   return (err, stats) => {
     //2 - enforce log, 1 - only on error, 0 - no log
-    if (webpackStatsLogType === 2 || (err && webpackStatsLogType === 1)) {
+    if (logMode === 2 || (err && logMode === 1)) {
       gutil.log('[webpack]', stats.toString({
         colors: colorsSupported,
         chunks: true,
@@ -39,7 +37,6 @@ function webpackStats(callback) {
 }
 
 function webpackRun(logMode, cb) {
-  webpackStatsLogType = logMode;
   const wpConfig = webpackBuilder.buildConfig();
 
   //force source maps to be inlined with the source files,
@@ -58,7 +55,7 @@ function webpackRun(logMode, cb) {
   if (config.getProcessingFlag('name') !== undefined) {
     config.error('\'--name\' option must not be specified for \'build\' task. ');
   }
-  webpack(wpConfig, webpackStats(cb));
+  webpack(wpConfig, webpackStats(logMode, cb));
 }
 
 gulp.task('build:clean', () => {
