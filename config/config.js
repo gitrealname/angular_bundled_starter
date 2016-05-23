@@ -42,6 +42,7 @@ const data = {
   dir: {
     //relative to root
     src,
+    node,
     generator,
     config,
     //relative to src
@@ -346,6 +347,29 @@ env.BUNDLE_ENTRIES = Object.keys(entryMap).filter((v) => v !== common);
 //debugInspectAndExit(dirMap);
 //debugInspectAndExit(srcDirs);
 //debugInspectAndExit(entryMap);
+
+function pathDiffToRelativePath(srcPath, destPath) {
+  srcPath = path.resolve(srcPath);
+  destPath = path.resolve(destPath);
+  const srcChunks = srcPath.split(/[\/\\]+/);
+  const destChunks = destPath.split(/[\/\\]+/);
+  const commonChunks = destChunks.reduce((prev, v, i) => {
+    if (v === srcChunks[i]) {
+      prev.push(v);
+    }
+    return prev;
+  }, []);
+
+  //compile '../' sufix
+  let res = '../'.repeat(destChunks.length - commonChunks.length);
+  const srcDiff = srcChunks.splice(commonChunks.length);
+  res = res + srcDiff.join('/') + '/';
+
+  //debugInspectAndExit(srcChunks, destChunks, res, srcDiff);
+
+  return res;
+}
+exports.pathDiffToRelativePath = pathDiffToRelativePath;
 
 
 /*

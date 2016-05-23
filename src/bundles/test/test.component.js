@@ -16,7 +16,6 @@ export class TestController {
     //initialize
     this.activate();
   }
-
   // Methods
   activate() {
     if (process.env.ENV === process.env.CONST.TEST_ENV) {

@@ -15,6 +15,7 @@ import del from 'del';
 import sourcemaps from 'gulp-sourcemaps';
 import vinylNamed from 'vinyl-named';
 import through2 from 'through2';
+import replace from 'gulp-replace';
 
 import config from '../config';
 import webpackBuilder from '../webpack.builder.js';
@@ -49,6 +50,14 @@ function webpackStats(err, stats) {
 function webpackRun(logMode) {
   webpackStatsLogType = logMode;
   const wpConfig = webpackBuilder.buildConfig();
+
+  //force source maps to be inlined with the source files,
+  // so they can be picked up by sourcemap processor
+  //If we don't, webpack ExtractTextPlugin
+  //will mess-up all file references in the map for Css files
+  //NOTE: commented out as even inline maps get corrupted
+  // sourcemap:fix logic has been improved to deal with the situation
+  //wpConfig.devtool = '#inline-source-map';
 
   //config.debugInspectAndExit(wpConfig);
 
@@ -85,6 +94,24 @@ gulp.task('build:clean', () => {
   return del(config.root(config.data.dest.prod));
 });
 
+gulp.task('build:sourcemap:extract', 'extract sourcemaps from bundles', () => {
+  const task = gulp.src([config.root(config.data.dest.prod) + '/**/*.{css,js}'])
+
+    .pipe(sourcemaps.init({
+      loadMaps: true,
+    }))
+
+    .pipe(sourcemaps.write('./', {
+      //addComment: true,
+      //includeContent: false,
+      //sourceRoot: '', //it will be set by 'build:sourcemap:fix'
+    }))
+
+    .pipe(gulp.dest(config.data.dest.prod));
+
+  return task;
+});
+
 gulp.task('build:test', () => {
   config.setEnvProdDebug();
   const wpConfig = webpackBuilder.buildConfig();
@@ -92,6 +119,8 @@ gulp.task('build:test', () => {
 
   //force source maps to be inlined with the source files,
   // so they can be picked up by sourcemap processor
+  //If don't inline source maps, webpack ExtractTextPlugin
+  // mess up all file names in the map for Css files
   wpConfig.devtool = '#inline-source-map';
 
   //config.debugInspectAndExit(entryList);
@@ -142,4 +171,27 @@ gulp.task('build:test', () => {
 
 //gulp.task('build', 'Build deployment packages.', ['build:clean', 'test:runonce', 'build:dual:debug']);
 //gulp.task('build', 'Build deployment package.', ['build:clean', 'build:dual:debug']);
-gulp.task('build', 'Build deployment package.', ['build:clean', 'build:test']);
+gulp.task('build', 'Build deployment package.', ['build:clean', 'build:release']);
+
+
+gulp.task('build:fixmaps', 'fixes source maps', () => {
+  const relativeSrcPath = config.pathDiffToRelativePath(config.rootSrc(), 'config.data.dest.prod');
+
+  const task = gulp.src([config.root(config.data.dest.prod) + '/**/*.map'])
+  //remove: ,"webpack:///webpack/bootstrap 298d98bea3abdfa02153"
+  .pipe(replace(/,"webpack:\/\/\/webpack\/bootstrap\s+[\d+a-f]+"/ig, ''))
+  //remove: "webpack:/// ....?130.."
+  .pipe(replace(/,"webpack:\/\/\/.*?js\?[\d+a-f]+"/ig, ''))
+  //remove webpack url
+  .pipe(replace(/(webpack:\/\/\/)+(\.\/)?/g, './'))
+  //fix node module path
+  .pipe(replace(/("\.\.\/)~/g, '$1' + config.data.dir.node))
+
+  .pipe(replace(/("sourceRoot".*?:.*?").*?"/, '$1' + relativeSrcPath + '"'))
+
+  .pipe(gulp.dest(config.data.dest.prod + '/tmp', {
+    overwrite: true,
+  }));
+
+  return task;
+});
