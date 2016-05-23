@@ -26,6 +26,8 @@ function prependEntriesWithHotMiddleware(entry) {
   });
 }
 
+const defaultRequestUrlRoot = config.data.dev.requestServerHost + ':' + config.data.dev.requestServerPort + config.data.dev.requestServerRoot;
+
 gulp.task('watch', 'run dev server with "hot replacement"', () => {
   config.setEnvDev();
   const webpackConfig = webpackBuilder.buildConfig();
@@ -38,7 +40,7 @@ gulp.task('watch', 'run dev server with "hot replacement"', () => {
 
   browserSync({
     port: config.data.dev.port,
-    open: false,
+    open: config.getProcessingFlag('open') !== undefined || false,
     server: { baseDir: config.rootSrc() },
     middleware: [
       historyApiFallback(),
@@ -53,5 +55,31 @@ gulp.task('watch', 'run dev server with "hot replacement"', () => {
       webpackHotMiddelware(webpackCompiler),
     ],
   });
+}, {
+  options: {
+    'name <bundle-name>, -n <bundle-name>': ['',
+          'Optional. Bundle names that will be watched.',
+          'The \'common\' is always watched.',
+          'If not specified all bundles will be watched.',
+          'Multiple \'--name\' options can be specified.',
+    ].join('\n\t'),
+    'open, -o': ['',
+          'Optional. If specified, opens default browser with development server url.',
+    ].join('\n\t'),
+    'server [<URL root>], -s [<URL root>]': ['',
+          'TBD: Optional. Url where all http requests will be re-directed to.',
+          'When not specified, all requests get processed by webpack-dev-server',
+          ' relative to \'' + config.data.dir.devData + '\'.',
+          'Optional <URL root> defines default request Url root.',
+          'If <Url root> is not specified. \'' + defaultRequestUrlRoot + '\' will be used.',
+          'It works in conjunction with \'common/services/requestProxy.service\'',
+          ' which adjusts URLs depending on environment and specified parameter.',
+          'Example, assuming \'--server ' + defaultRequestUrlRoot + '\':',
+          ' $http.get(/MyArea/SpecialController/DataAction) ==> ' + defaultRequestUrlRoot + '/MyArea/SpecialController/DataAction',
+          'Example, assuming that \'--server\' (no parameter value):',
+          ' $http.get(/MyArea/SpecialController/DataAction) ==> ' + config.data.dev.url + '/' + config.data.dir.devData + '/MyArea/SpecialController/DataAction',
+          'NOTE: when --server is not specified, \'common/services/requestProxy.service\' changes all POST, PUT, DELETE methods into GET.',
+    ].join('\n\t'),
+  },
 });
 

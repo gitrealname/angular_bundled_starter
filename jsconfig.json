@@ -11,11 +11,13 @@
 		"tmp",
 		"temp",
         "coverage",
+		"test.coverage",
         "dest",
-        "dest.dev",
-        "dest.test",
-        "dist",
+        "dev.dest",
+        "test.dest",
+        "prod.dest",
         "dist.dev",
-        "dist.test"
+        "dist.test",
+		"dist"
 	]
 }

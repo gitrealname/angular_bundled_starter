@@ -42,6 +42,7 @@
         }],
       })
       .config(['$locationProvider', '$urlRouterProvider', '$stateProvider', ($locationProvider, $urlRouterProvider, $stateProvider) => {
+          console.log('non only bundle');
           if (!<%= webpackConfig.metadata.env.ONLY_BUNDLE %>) {
             $locationProvider.html5Mode(false).hashPrefix('!');
             $urlRouterProvider.otherwise('/');

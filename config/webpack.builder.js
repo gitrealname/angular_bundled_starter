@@ -55,7 +55,7 @@ function buildOutput() {
     suffix = '.min.';
   }
 
-  return {
+  const ret = {
     /**
      * The output directory as absolute path (required).
      *
@@ -94,6 +94,16 @@ function buildOutput() {
      */
     chunkFilename: '[id].chunk' + suffix + 'js',
   };
+
+  //if (config.isEnvProd()) {
+    /**
+     * See: http://webpack.github.io/docs/configuration.html#output-devtoolmodulefilenametemplate
+    */
+    //ret.devtoolModuleFilenameTemplate = '[resource-path]';
+    //delete(ret.sourceMapFilename);
+  //}
+
+  return ret;
 }
 module.exports.buildOutput = buildOutput;
 
@@ -449,12 +459,18 @@ function buildPlugins() {
         from: config.data.dir.assets,
         to: config.data.dir.assets,
       }]),
-      new CopyWebpackPlugin([{
-        from: config.data.dir.devData,
-        to: config.data.dir.devData,
-      }]),
     ]);
-  }
+
+    //don't copy test server data to prod dist directory
+    if (!config.isEnvProd()) {
+      plst = plst.concat([
+        new CopyWebpackPlugin([{
+          from: config.data.dir.devData,
+          to: config.data.dir.devData,
+        }]),
+      ]);
+    }
+  } // if (config.data.currentDest.length)
 
   return plst;
 }
@@ -487,7 +503,7 @@ function buildNode() {
 module.exports.buildNode = buildNode;
 
 function buildDevServer() {
-  if (!config.isEnvDev()) {
+  if (!config.isEnvDev() && !config.isEnvTest()) {
     return { };
   }
 /*
@@ -513,7 +529,7 @@ function buildDevServer() {
       aggregateTimeout: 300,
       poll: 1000,
     },
-    outputPath: config.root(config.data.dest.dev),
+    outputPath: config.data.dest.dev ? config.root(config.data.dest.dev) : config.rootSrc(),
   };
   return cfg;
 }

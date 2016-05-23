@@ -1,12 +1,16 @@
+/**
+ * @author: FEi
+ */
 /*eslint max-len: 0*/
 /*eslint prefer-rest-params: 0*/
 /*eslint prefer-template: 0*/
 
 import util from 'util';
 
-/**
- * @author: FEi
- */
+/*
+* Naming case variations terminology
+* See: https://en.wikipedia.org/wiki/Letter_case#Special_case_styles
+*/
 import console from 'console';
 import path from 'path';
 import glob from 'glob';
@@ -21,6 +25,9 @@ const argv = require('yargs')
   .alias('s', 'server')
   .argv;
 
+/*
+* Build system configuration
+*/
 const src = 'src';
 const node = 'node_modules';
 const generator = 'generator';
@@ -30,9 +37,78 @@ const assets = 'Content';
 const devData = 'dev.server.data';
 const config = 'config';
 
-// Helper functions
+const data = {
+  //relative to root
+  dir: {
+    //relative to root
+    src,
+    generator,
+    config,
+    //relative to src
+    assets,
+    devData,
+    common,
+    bundles,
+  },
+  file: {
+    index: 'index.html',
+  },
+  dest: {
+    prod: 'prod.dest',
+    dev: '',
+    test: '',
+    coverage: 'test.coverage',
+  },
+  env: {
+    prod: 'production',
+    dev: 'development',
+    test: 'test',
+  },
+  build: {
+    release: 'release',
+    debug: 'debug',
+    test: 'test',
+  },
+  dev: {
+    host: 'localhost',
+    port: 3000,
+    url: 'DEFINED BELOW!',
+    requestServerHost: 'http://localhost',
+    requestServerPort: '19010',
+    requestServerRoot: '/webapp',
+  },
+  test: {
+    port: 3666,
+  },
+  entryMap: {
+    'DEFINED BELOW!': 1,
+  },
+  currentDest: '< one of the data.dest, determined based on env>',
+};
+exports.data = data;
 
+const env = {
+  ENV: data.env.prod,
+  BUILD: data.build.release,
+  WATCH: false, //is true when 'continues' testing/development is running
+  ONLY_BUNDLE: '<flag, is set to true if only one bundle (common is not counted) is specified>',
+  BUNDLES: '<explicetly specified (by --name param) list of bundles>',
+  BUNDLE_ENTRIES: '<all resolved bundles excluding common>',
+  PORT: '<server port>',
+  CONST: {
+    TEST_ENV: data.env.test,
+    PROD_ENV: data.env.prod,
+    DEV_ENV: data.env.dev,
+  },
+};
+exports.env = env;
 
+data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
+env.PORT = data.dev.port;
+
+/*
+* Helper functions
+*/
 function debugInspectAndExit(...args) {
   args.forEach((o) => {
     console.log(util.inspect(o, { colors: true, depth: 10, showHidden: false }));
@@ -185,73 +261,6 @@ function looseNameToXCase(val, caseType, dropSuffix = true) {
   return str;
 }
 exports.looseNameToXCase = looseNameToXCase;
-
-//config
-const data = {
-  //relative to root
-  dir: {
-    //relative to root
-    src,
-    generator,
-    config,
-    //relative to src
-    assets,
-    devData,
-    common,
-    bundles,
-  },
-  file: {
-    index: 'index.html',
-  },
-  dest: {
-    prod: 'prod.dest',
-    dev: '',
-    test: '',
-    coverage: 'test.coverage',
-  },
-  env: {
-    prod: 'production',
-    dev: 'development',
-    test: 'test',
-  },
-  build: {
-    release: 'release',
-    debug: 'debug',
-    test: 'test',
-  },
-  dev: {
-    host: 'localhost',
-    port: 3000,
-    url: 'DEFINED BELOW!',
-  },
-  test: {
-    port: 3666,
-  },
-  entryMap: {
-    'DEFINED BELOW!': 1,
-  },
-  currentDest: '< one of the data.dest, determined based on env>',
-};
-exports.data = data;
-
-const env = {
-  ENV: data.env.prod,
-  BUILD: data.build.release,
-  WATCH: false, //is true when 'continues' testing/development is running
-  ONLY_BUNDLE: '<flag, is set to true if only one bundle (common is not counted) is specified>',
-  BUNDLES: '<explicetly specified (by --name param) list of bundles>',
-  BUNDLE_ENTRIES: '<all resolved bundles excluding common>',
-  PORT: '<server port>',
-  CONST: {
-    TEST_ENV: data.env.test,
-    PROD_ENV: data.env.prod,
-    DEV_ENV: data.env.dev,
-  },
-};
-exports.env = env;
-
-data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
-env.PORT = data.dev.port;
 
 /*
 * Process command line parameters and create halping data sets
