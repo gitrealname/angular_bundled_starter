@@ -3,51 +3,42 @@
 
 /*
 * See: https://www.npmjs.com/package/gulp-help
-* See: https://github.com/floridoo/gulp-sourcemaps
-* See: https://github.com/shama/webpack-stream
+* See: https://www.npmjs.com/package/run-sequence
+* See: https://webpack.github.io/docs/usage-with-gulp.html
 */
 const gulp = require('gulp-help')(require('gulp'));
 import gutil from 'gulp-util';
 import colorsSupported from 'supports-color';
 import webpack from 'webpack';
-import webpackStream from 'webpack-stream';
 import del from 'del';
-import sourcemaps from 'gulp-sourcemaps';
-import vinylNamed from 'vinyl-named';
-import through2 from 'through2';
 import replace from 'gulp-replace';
+import runSequence from 'run-sequence';
 
 import config from '../config';
 import webpackBuilder from '../webpack.builder.js';
 
 let webpackStatsLogType = 2;
 
-function buildWebpackEntryList(wpConfig) {
-  //config.debugInspectAndExit(wpConfig.entry);
-
-  const entryList = Object.keys(wpConfig.entry).reduce((prev, k) => {
-    const v = wpConfig.entry[k][0];
-    prev.push(v);
-    return prev;
-  }, []);
-  return entryList;
+function webpackStats(callback) {
+  return (err, stats) => {
+    //2 - enforce log, 1 - only on error, 0 - no log
+    if (webpackStatsLogType === 2 || (err && webpackStatsLogType === 1)) {
+      gutil.log('[webpack]', stats.toString({
+        colors: colorsSupported,
+        chunks: true,
+        errorDetails: true,
+      }));
+    }
+    if (err) {
+      throw new gutil.PluginError('webpack', err);
+    }
+    if (callback) {
+      callback();
+    }
+  };
 }
 
-function webpackStats(err, stats) {
-  //2 - enforce log, 1 - only on error, 0 - no log
-  if (webpackStatsLogType === 2 || (err && webpackStatsLogType === 1)) {
-    gutil.log('[webpack]', stats.toString({
-      colors: colorsSupported,
-      chunks: true,
-      errorDetails: true,
-    }));
-  }
-  if (err) {
-    throw new gutil.PluginError('webpack', err);
-  }
-}
-
-function webpackRun(logMode) {
+function webpackRun(logMode, cb) {
   webpackStatsLogType = logMode;
   const wpConfig = webpackBuilder.buildConfig();
 
@@ -64,134 +55,55 @@ function webpackRun(logMode) {
   //'build' task always builds all bundles.
   //so that 'vendor' and 'common' get all dependencies.
   //to prevent webpack builder confusion, we disable --name
-  if (config.getProcessingFlag('name')) {
+  if (config.getProcessingFlag('name') !== undefined) {
     config.error('\'--name\' option must not be specified for \'build\' task. ');
   }
-  webpack(wpConfig, webpackStats);
+  webpack(wpConfig, webpackStats(cb));
 }
-
-gulp.task('build:debug', () => {
-  config.setEnvProdDebug();
-  webpackRun(2);
-});
-
-gulp.task('build:release', () => {
-  config.setEnvProdRelease();
-  webpackRun(2);
-});
-
-gulp.task('build:dual:release', () => {
-  config.setEnvProdRelease();
-  webpackRun(1);
-});
-
-gulp.task('build:dual:debug', ['build:dual:release'], () => {
-  config.setEnvProdDebug();
-  webpackRun(2);
-});
 
 gulp.task('build:clean', () => {
   return del(config.root(config.data.dest.prod));
 });
 
-gulp.task('build:sourcemap:extract', 'extract sourcemaps from bundles', () => {
-  const task = gulp.src([config.root(config.data.dest.prod) + '/**/*.{css,js}'])
-
-    .pipe(sourcemaps.init({
-      loadMaps: true,
-    }))
-
-    .pipe(sourcemaps.write('./', {
-      //addComment: true,
-      //includeContent: false,
-      //sourceRoot: '', //it will be set by 'build:sourcemap:fix'
-    }))
-
-    .pipe(gulp.dest(config.data.dest.prod));
-
-  return task;
-});
-
-gulp.task('build:test', () => {
+gulp.task('build:debug', (cb) => {
   config.setEnvProdDebug();
-  const wpConfig = webpackBuilder.buildConfig();
-  const entryList = buildWebpackEntryList(wpConfig);
-
-  //force source maps to be inlined with the source files,
-  // so they can be picked up by sourcemap processor
-  //If don't inline source maps, webpack ExtractTextPlugin
-  // mess up all file names in the map for Css files
-  wpConfig.devtool = '#inline-source-map';
-
-  //config.debugInspectAndExit(entryList);
-  //config.debugInspectAndExit(wpConfig);
-
-  const task = gulp.src(entryList)
-    //.pipe(vinylNamed())
-
-    .pipe(webpackStream(wpConfig, webpack/*, webpackStats*/)) // blend in the webpack config into the source files
-
-    .pipe(sourcemaps.init({
-      loadMaps: true,
-      identityMap: true,
-      debug: true,
-    }))
-
-/*    .pipe(through2((file, enc, cb) => {
-      // Dont pipe through any source map files as it will be handled
-      // by gulp-sourcemaps
-      const isSourceMap = /\.map$/.test(file.path);
-      config.info(this);
-      if (!isSourceMap) {
-        this.push(file);
-      }
-      cb();
-    }))
-*/
-    .pipe(sourcemaps.write('./', {
-      addComment: true,
-      includeContent: false,
-      sourceRoot: '../src3', //TBI: dynamically calculated
-      destPath: gulp.dest(config.data.dest.prod),
-      debug: true,
-      //charset: 'utf8',
-      //sourceMappingURLPrefix: 'https://asset-host.example.com/assets',
-      //sourceMappingURL: (file) => { return 'https://asset-host.example.com/' + file.relative + '.map'; },
-      //mapFile: (mapFilePath) => { return mapFilePath.replace('.js.map', '.map'); },
-      //mapSources: (sourcePath) => { return '../src/' + sourcePath; },
-
-      //mapFile: (mapFilePath) => { config.info(mapFilePath); return mapFilePath; },
-      //mapSources: (sourcePath) => { config.info(sourcePath); return '../SRC/' + sourcePath; },
-    }))
-
-    .pipe(gulp.dest(config.data.dest.prod));
-
-  return task;
+  webpackRun(2, cb);
 });
 
-//gulp.task('build', 'Build deployment packages.', ['build:clean', 'test:runonce', 'build:dual:debug']);
-//gulp.task('build', 'Build deployment package.', ['build:clean', 'build:dual:debug']);
-gulp.task('build', 'Build deployment package.', ['build:clean', 'build:release']);
+gulp.task('build:release', (cb) => {
+  config.setEnvProdRelease();
+  webpackRun(2, cb);
+});
 
-
-gulp.task('build:fixmaps', 'fixes source maps', () => {
+gulp.task('build:sourcemap:fix', 'fixes source maps', () => {
   const relativeSrcPath = config.pathDiffToRelativePath(config.rootSrc(), 'config.data.dest.prod');
+  const rx = new RegExp('"(webpack:\\/\\/\\/){2}([^"]+)\\/' + config.data.dir.src + '\\/\\2[^"]+"([,]?)', 'gi');
 
   const task = gulp.src([config.root(config.data.dest.prod) + '/**/*.map'])
+  //remove: webpack:///webpack:///xxx/yyy/src/xxx/yyy
+  .pipe(replace(rx, ''))
   //remove: ,"webpack:///webpack/bootstrap 298d98bea3abdfa02153"
   .pipe(replace(/,"webpack:\/\/\/webpack\/bootstrap\s+[\d+a-f]+"/ig, ''))
   //remove: "webpack:/// ....?130.."
-  .pipe(replace(/,"webpack:\/\/\/.*?js\?[\d+a-f]+"/ig, ''))
+  .pipe(replace(/"webpack:\/\/\/[^"]*?(js|ts)\?[0-9a-f]+"([,]?)/ig, ''))
   //remove webpack url
   .pipe(replace(/(webpack:\/\/\/)+(\.\/)?/g, './'))
   //fix node module path
-  .pipe(replace(/("\.\.\/)~/g, '$1' + config.data.dir.node))
-
+  .pipe(replace(/("\.\/\.\.\/)~/g, '$1' + config.data.dir.node))
+  //remove source entry that is point to bundle file (it is always has single '/' and is infront of sources)
+  .pipe(replace(/("sources":\[)"\.\/[^\/"]+"([,]?)/, '$1'))
+  //fix array ending after removal of content
+  .pipe(replace(/",]/g, '"]'))
+  //set srouceRoot
   .pipe(replace(/("sourceRoot".*?:.*?").*?"/, '$1' + relativeSrcPath + '"'))
 
-  .pipe(gulp.dest(config.data.dest.prod + '/tmp', {
+  .pipe(gulp.dest(config.data.dest.prod, {
     overwrite: true,
   }));
 
   return task;
+});
+
+gulp.task('build', 'Build deployment package.', () => {
+  runSequence('build:clean', 'build:release', 'build:sourcemap:fix');
 });

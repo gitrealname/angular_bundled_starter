@@ -95,14 +95,6 @@ function buildOutput() {
     chunkFilename: '[id].chunk' + suffix + 'js',
   };
 
-  //if (config.isEnvProd()) {
-    /**
-     * See: http://webpack.github.io/docs/configuration.html#output-devtoolmodulefilenametemplate
-    */
-    //ret.devtoolModuleFilenameTemplate = '[resource-path]';
-    //delete(ret.sourceMapFilename);
-  //}
-
   return ret;
 }
 module.exports.buildOutput = buildOutput;
