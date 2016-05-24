@@ -72,6 +72,8 @@ gulp.task('build:release', (cb) => {
   webpackRun(2, cb);
 });
 
+const sourceRootRx = new RegExp('("sourceRoot"\\s*:\\s*")([^"]*")', 'i');
+
 gulp.task('build:sourcemap:fix', 'fixes source maps', () => {
   const relativeSrcPath = config.pathDiffToRelativePath(config.rootSrc(), 'config.data.dest.prod');
   const rx = new RegExp('"(webpack:\\/\\/\\/){2}([^"]+)\\/' + config.data.dir.src + '\\/\\2[^"]+"([,]?)', 'gi');
@@ -92,7 +94,7 @@ gulp.task('build:sourcemap:fix', 'fixes source maps', () => {
   //fix array ending after removal of content
   .pipe(replace(/",]/g, '"]'))
   //set srouceRoot
-  .pipe(replace(/("sourceRoot".*?:.*?").*?"/, '$1' + relativeSrcPath + '"'))
+  .pipe(replace(sourceRootRx, '$1' + relativeSrcPath + '"'))
 
   .pipe(gulp.dest(config.data.dest.prod, {
     overwrite: true,
@@ -101,6 +103,6 @@ gulp.task('build:sourcemap:fix', 'fixes source maps', () => {
   return task;
 });
 
-gulp.task('build', 'Build deployment package.', () => {
-  runSequence('build:clean', 'build:release', 'build:sourcemap:fix');
+gulp.task('build', 'Build deployment package.', (cb) => {
+  runSequence('build:clean', 'build:release', 'build:sourcemap:fix', cb);
 });

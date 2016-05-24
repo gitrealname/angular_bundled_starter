@@ -12,52 +12,72 @@ import runSequence from 'run-sequence';
 
 import config from '../config';
 
+const sourceRootRx = new RegExp('("sourceRoot"\\s*:\\s*")([^"]*")', 'i');
+
 gulp.task('publish:scripts', () => {
-
-});
-
-gulp.task('publish:styles', () => {
-
-});
-
-gulp.task('publish:content', () => {
-
-});
-
-gulp.task('publish', 'Builds and publishes bundles.', [], () => {
-  const root = config.rootPublish();
-  config.warn('Publishing to: ', root);
-});
-
-gulp.task('publish:sourcemap:fix', 'fixes source maps', () => {
-  const relativeSrcPath = config.pathDiffToRelativePath(config.rootSrc(), 'config.data.dest.prod');
-  const rx = new RegExp('"(webpack:\\/\\/\\/){2}([^"]+)\\/' + config.data.dir.src + '\\/\\2[^"]+"([,]?)', 'gi');
-
-  const task = gulp.src([config.root(config.data.dest.prod) + '/**/*.map'])
-  //remove: webpack:///webpack:///xxx/yyy/src/xxx/yyy
-  .pipe(replace(rx, ''))
-  //remove: ,"webpack:///webpack/bootstrap 298d98bea3abdfa02153"
-  .pipe(replace(/,"webpack:\/\/\/webpack\/bootstrap\s+[\d+a-f]+"/ig, ''))
-  //remove: "webpack:/// ....?130.."
-  .pipe(replace(/"webpack:\/\/\/[^"]*?(js|ts)\?[0-9a-f]+"([,]?)/ig, ''))
-  //remove webpack url
-  .pipe(replace(/(webpack:\/\/\/)+(\.\/)?/g, './'))
-  //fix node module path
-  .pipe(replace(/("\.\/\.\.\/)~/g, '$1' + config.data.dir.node))
-  //remove source entry that is point to bundle file (it is always has single '/' and is infront of sources)
-  .pipe(replace(/("sources":\[)"\.\/[^\/"]+"([,]?)/, '$1'))
-  //fix array ending after removal of content
-  .pipe(replace(/",]/g, '"]'))
-  //set srouceRoot
-  .pipe(replace(/("sourceRoot".*?:.*?").*?"/, '$1' + relativeSrcPath + '"'))
-
-  .pipe(gulp.dest(config.data.dest.prod, {
-    overwrite: true,
-  }));
-
+  const dest = config.rootPublish(config.data.publish.scripts);
+  config.info('Publishing scripts to: ', dest);
+  const src = config.root(config.data.dest.prod);
+  const task = gulp.src([src + '/**/*.js'])
+    .pipe(gulp.dest(dest, {
+      overwrite: true,
+    }));
   return task;
 });
 
-gulp.task('build', 'Build deployment package.', () => {
-  runSequence('build:clean', 'build:release', 'build:sourcemap:fix');
+gulp.task('publish:scripts:sourcemaps', () => {
+  const dest = config.rootPublish(config.data.publish.scripts);
+  config.info('Publishing scripts sourcemaps to: ', dest);
+  const src = config.root(config.data.dest.prod);
+  const sourcemapPath = config.pathDiffToRelativePath(config.rootSrc(), dest);
+  const task = gulp.src([src + '/**/*.js.map'])
+    .pipe(replace(sourceRootRx, '$1' + sourcemapPath + '"'))
+    .pipe(gulp.dest(dest, {
+      overwrite: true,
+    }));
+  return task;
+});
+
+gulp.task('publish:styles', () => {
+  const dest = config.rootPublish(config.data.publish.styles);
+  config.info('Publishing styles to: ', dest);
+  const src = config.root(config.data.dest.prod);
+  const task = gulp.src([src + '/**/*.css'])
+    .pipe(gulp.dest(dest, {
+      overwrite: true,
+    }));
+  return task;
+});
+
+gulp.task('publish:styles:sourcemaps', () => {
+  const dest = config.rootPublish(config.data.publish.styles);
+  config.info('Publishing styles sourcemaps to: ', dest);
+  const src = config.root(config.data.dest.prod);
+  const sourcemapPath = config.pathDiffToRelativePath(config.rootSrc(), dest);
+  const task = gulp.src([src + '/**/*.css.map'])
+    .pipe(replace(sourceRootRx, '$1' + sourcemapPath + '"'))
+    .pipe(gulp.dest(dest, {
+      overwrite: true,
+    }));
+  return task;
+});
+
+gulp.task('publish:assets', () => {
+  const dest = config.rootPublish(config.data.publish.content);
+  config.info('Publishing assets to: ', dest);
+  const src = config.root(config.data.dest.prod, config.data.dir.assets);
+  const task = gulp.src([src + '/**/*.*'])
+    .pipe(gulp.dest(dest, {
+      overwrite: true,
+    }));
+  return task;
+});
+
+gulp.task('publish:only',
+  'Publish bundles without re-build. IMPORTANT: may be used for debugging purposes only!.',
+  ['publish:scripts', 'publish:scripts:sourcemaps', 'publish:styles', 'publish:styles:sourcemaps', 'publish:assets']);
+
+
+gulp.task('publish', 'Builds and publishes bundles.', () => {
+  runSequence('build', 'publish:only');
 });

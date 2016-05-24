@@ -47,7 +47,9 @@ function buildOutput() {
   let path = config.root(config.data.dest.prod);
   let publicPath = '';
   let suffix = '.';
-  if (config.isEnvDev()) {
+  //WORING ON THIS! due to Module not found:
+  //Error: Can't resolve './Content/images/yang-yin.jpg' in 'D:\work\ngLtssStarter\src\bundles\test'
+  if (config.isEnvDev() || config.isEnvTest()) {
     path = config.rootSrc();
     publicPath = '/';
   }
@@ -181,7 +183,7 @@ function buildLoaders() {
 
   const m = config.isBuildDebug() ? '-minimize' : 'minimize';
   const excRx = excludeRx();
-
+  const src = config.rootSrc();
   let lst = [
     {
       test: /\.js$/,
@@ -205,7 +207,7 @@ function buildLoaders() {
     { test: /\.png$/, loader: 'url-loader?limit=1024' },
     { test: /\.jpg$/, loader: 'file-loader' },
     { test: /\.css$/, loader: styleLoader(`?sourceMap&${m}`) },
-    { test: /\.styl$/, loader: styleLoader(`?sourceMap&${m}!stylus?sourceMap`) },
+    { test: /\.styl$/, loader: styleLoader(`?sourceMap&${m}!stylus?sourceMap&paths=` + src + '/') },
     { test: /\.less$/, loader: styleLoader(`?sourceMap&${m}!less?sourceMap`) },
     { test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'url-loader' },
     { test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'url-loader' },
@@ -220,7 +222,7 @@ function buildLoaders() {
       *
       * See: https://github.com/webpack/html-loader
       */
-    { test: /\.html$/, loader: 'html', exclude: [config.rootSrc('index.html')] },
+    { test: /\.html$/, loader: 'html?-attrs', exclude: [config.rootSrc('index.html')] },
 
   ];
 

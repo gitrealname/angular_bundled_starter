@@ -5,7 +5,7 @@ import NavbarModule from './navbar';
 import NavbarComponent, { NavbarController } from './navbar.component';
 import NavbarTemplate from './navbar.html';
 
-describe('Common.Navbar component', () => {
+describe('Test.Navbar component', () => {
   let $rootScope;
   let makeController;
 
