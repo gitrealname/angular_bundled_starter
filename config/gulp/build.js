@@ -62,37 +62,46 @@ gulp.task('build:clean', () => {
   return del(config.root(config.data.dest.prod));
 });
 
-gulp.task('build:debug', (cb) => {
+gulp.task('build:compile:debug', (cb) => {
   config.setEnvProdDebug();
   webpackRun(2, cb);
 });
 
-gulp.task('build:release', (cb) => {
+gulp.task('build:compile:release', (cb) => {
   config.setEnvProdRelease();
   webpackRun(2, cb);
 });
 
 const sourceRootRx = new RegExp('("sourceRoot"\\s*:\\s*")([^"]*")', 'i');
 
+//IMPORTANT: format of the source map dictated by logic in the webpackBuilder
+// see buildOutput() in webpack.builder.js
+//file patterns and translations (==>)
+//  ~/[a-z]... - actual bundle ==> [a-z]...
+//  ~/./.... - keep invisible ==> (do nothing)...
+//  ~/../~/.... - node modules ==> ../node_modules/.......
+//  _css_/webpack:///<path>/src/<same-path>... - actual original files ==> ./<same-path>...
+//  _css_/webpack:///<path>.... - styles translated ==> ~/./<path>...
+// webpack/bootstrap... ==> move to ~
 gulp.task('build:sourcemap:fix', 'fixes source maps', () => {
   const relativeSrcPath = config.pathDiffToRelativePath(config.rootSrc(), 'config.data.dest.prod');
-  const rx = new RegExp('"(webpack:\\/\\/\\/){2}([^"]+)\\/' + config.data.dir.src + '\\/\\2[^"]+"([,]?)', 'gi');
+  const cssRepeatRx = new RegExp('("_css_\\/webpack:\\/\\/\\/)([^"]+)\\/' + config.data.dir.src + '\\/\\2([^"]+")', 'gi');
 
   const task = gulp.src([config.root(config.data.dest.prod) + '/**/*.map'])
-  //remove: webpack:///webpack:///xxx/yyy/src/xxx/yyy
-  .pipe(replace(rx, ''))
-  //remove: ,"webpack:///webpack/bootstrap 298d98bea3abdfa02153"
-  .pipe(replace(/,"webpack:\/\/\/webpack\/bootstrap\s+[\d+a-f]+"/ig, ''))
-  //remove: "webpack:/// ....?130.."
-  .pipe(replace(/"webpack:\/\/\/[^"]*?(js|ts)\?[0-9a-f]+"([,]?)/ig, ''))
-  //remove webpack url
-  .pipe(replace(/(webpack:\/\/\/)+(\.\/)?/g, './'))
-  //fix node module path
-  .pipe(replace(/("\.\/\.\.\/)~/g, '$1' + config.data.dir.node))
-  //remove source entry that is point to bundle file (it is always has single '/' and is infront of sources)
-  .pipe(replace(/("sources":\[)"\.\/[^\/"]+"([,]?)/, '$1'))
-  //fix array ending after removal of content
-  .pipe(replace(/",]/g, '"]'))
+
+  //process ~/[a-z]... - actual bundle ==> [a-z]...
+  .pipe(replace(/"~\/([^\.][^"]+?")/gi, '"$1'))
+  //~/../~/.... - node modules ==> ../node_modules/
+  .pipe(replace(/~\/\.\.\/~/gi, '../' + config.data.dir.node))
+  //temporary rename good _css_ to make it different from bad css entries
+  .pipe(replace(cssRepeatRx, '"_css_./$2$3'))
+  //move bad css into ~/
+  .pipe(replace(/_css_\/webpack:\/\//gi, '~/.'))
+  //finalize good css name
+  .pipe(replace(/"_css_/gi, '"'))
+  // webpack/bootstrap... ==> move to ~
+  .pipe(replace(/"(webpack\/bootstrap)/gi, '"~/./$1'))
+
   //set srouceRoot
   .pipe(replace(sourceRootRx, '$1' + relativeSrcPath + '"'))
 
@@ -103,6 +112,12 @@ gulp.task('build:sourcemap:fix', 'fixes source maps', () => {
   return task;
 });
 
-gulp.task('build', 'Build deployment package.', (cb) => {
-  runSequence('build:clean', 'build:release', 'build:sourcemap:fix', cb);
+gulp.task('build:release', 'Build deployment package.', (cb) => {
+  runSequence('build:clean', 'build:compile:release', 'build:sourcemap:fix', cb);
 });
+
+gulp.task('build:debug', 'Build debug(non-minified) deployment package.', (cb) => {
+  runSequence('build:clean', 'build:compile:debug', 'build:sourcemap:fix', cb);
+});
+
+gulp.task('build', 'Default build action => Release', ['build:release']);

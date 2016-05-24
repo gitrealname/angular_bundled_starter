@@ -97,6 +97,51 @@ function buildOutput() {
     chunkFilename: '[id].chunk' + suffix + 'js',
   };
 
+  /**
+   * See: http://webpack.github.io/docs/configuration.html#output-devtoolmodulefilenametemplate
+  */
+  //IMPORTANT: build:sourcemap:fix gulp task depends very havely on
+  // format of the source map. Any change here must propogated into
+  // build:sourcemap:fix bulp task!!!!!
+  ret.devtoolModuleFilenameTemplate = (info) => {
+    const rp = info.resourcePath;
+    //keep node modules as is move everything else under '~/'
+    //we expect that js and ts resources will be processed again
+    //and final apperance of resource  is going to be actual source file.
+    if (rp.match(/^\.\/~/)) {
+      return info.resourcePath;
+    }
+    //we care about styles naming only for build purposes for easy of correction.
+    if (config.isEnvProd()) {
+      //move styles into _styles_ directory with custom name
+      if (rp.match(/(styl|less|sass|css)$/)) {
+        return '_css_/' + rp; // + '?hash=' + info.hash;
+      }
+    }
+    return '~/' + info.resourcePath + '?' + info.hash + (info.moduleId ? '-' + info.moduleId : '');
+  };
+
+  ret.devtoolFallbackModuleFilenameTemplate = (info) => {
+    const rp = info.resourcePath;
+    //restore original name only for source files (js|ts) and node_modules (./~)
+    //keep everything else in '~' folder
+    if (rp.match(/\.(js|ts)/) || rp.match(/^\.\/~/)) {
+      return info.resourcePath;
+    }
+    //styles being kept in separate directory, normolize repeated name,
+    //assuming that it is original source file
+    if (rp.match(/(styl|less|sass|css)$/)) {
+      return '_css_/' + rp;
+    }
+
+    //let newRP
+    //if (newRP = rp.replace(/webpack:\/\/\/(.*?(styl|less|sass|css)/, './$1')) {
+      //return newRP;
+    //}
+    //config.debugInspectAndExit(info);
+    return '~/' + info.resourcePath + '?' + info.hash + (info.moduleId ? '-' + info.moduleId : '');
+  };
+
   return ret;
 }
 module.exports.buildOutput = buildOutput;

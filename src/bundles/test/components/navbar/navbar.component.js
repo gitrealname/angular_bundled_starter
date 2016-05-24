@@ -3,7 +3,7 @@ import template from './navbar.html';
 
 export class NavbarController {
   constructor() {
-    this.name = 'navbar';
+    this.name = 'Test home';
   }
 }
 

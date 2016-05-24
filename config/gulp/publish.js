@@ -78,6 +78,12 @@ gulp.task('publish:only',
   ['publish:scripts', 'publish:scripts:sourcemaps', 'publish:styles', 'publish:styles:sourcemaps', 'publish:assets']);
 
 
-gulp.task('publish', 'Builds and publishes bundles.', () => {
-  runSequence('build', 'publish:only');
+gulp.task('publish:debug', 'Builds and publishes debug bundles.', () => {
+  runSequence('build:debug', 'publish:only');
 });
+
+gulp.task('publish:release', 'Builds and publishes Release bundles.', () => {
+  runSequence('build:release', 'publish:only');
+});
+
+gulp.task('publish', 'Default publish => Release', ['publish:release']);
