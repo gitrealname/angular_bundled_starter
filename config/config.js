@@ -35,7 +35,7 @@ const generator = 'generator';
 const bundles = 'bundles';
 const common = 'common';
 const assets = 'Content';
-const devData = 'dev.server.data';
+const devData = 'mock.server';
 const config = 'config';
 
 const data = {

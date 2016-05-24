@@ -2,20 +2,23 @@
 <div class="test">
   <img src="Content/images/yang-yin.jpg" alt="">
   <section>
-    <p>{{ vm.httpName }}</p>
-    <p>{{ vm.name }} header</p>
-    <common-navbar></common-navbar>
+    <h1>{{ vm.name }} header</h1>
+    <test-navbar></test-navbar>
   <section>
 
   </section>
-    <p>--------{{ vm.name }} body----------</p>
+
     <div ui-view>
-      <h1>This is default content!</h1>
+      <br/>
+      <button ng-click="vm.onGetData()">GetData</button>
+      <ul>
+        <li ng-repeat="val in vm.dataList">{{val}}</li>
+      </ul>
     </div>
-    <p>--------END: {{ vm.name }} body-----</p>
-  </section>
 
   </section>
+
+  <section class="footer">
     <p>{{ vm.name }} footer</p>
   </section>
 </div>
