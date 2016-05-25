@@ -9,7 +9,7 @@ export default angular.module('test.about', [
 .config(($stateProvider) => {
   'ngInject';
   let url = '/about';
-  if (process.env.ONLY_BUNDLE || process.env.ENV === process.env.CONST.PROD_ENV) {
+  if (process.env.ONLY_BUNDLE || process.env.ENV === process.env.CONST_ENV_PROD) {
     // Having '^' prevents double '/' when parent state url is '/'
     url = '^/about';
   }

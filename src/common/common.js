@@ -9,7 +9,7 @@ const deps = [
   commonServicesModule.name,
 ];
 
-if (process.env.ENV === process.env.CONST.DEV_ENV) {
+if (process.env.ENV === process.env.CONST_ENV_DEV) {
   deps.push(commonDevServicesModule.name);
 }
 

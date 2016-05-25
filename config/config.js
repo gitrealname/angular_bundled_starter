@@ -99,21 +99,16 @@ exports.data = data;
 const env = {
   ENV: data.env.prod,
   BUILD: data.build.release,
-  WATCH: false, //is true when 'continues' testing/development is running
   ONLY_BUNDLE: '<flag, is set to true if only one bundle (common is not counted) is specified>',
   BUNDLES: '<explicetly specified (by --name param) list of bundles>',
   BUNDLE_ENTRIES: '<all resolved bundles excluding common>',
-  PORT: '<server port>',
-  CONST: {
-    TEST_ENV: data.env.test,
-    PROD_ENV: data.env.prod,
-    DEV_ENV: data.env.dev,
-  },
+  CONST_ENV_TEST: data.env.test,
+  CONST_ENV_PROD: data.env.prod,
+  CONST_ENV_DEV: data.env.dev,
 };
 exports.env = env;
 
 data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
-env.PORT = data.dev.port;
 
 /*
 * Helper functions

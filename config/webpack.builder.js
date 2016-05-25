@@ -403,7 +403,14 @@ function buildPlugins() {
      */
     // NOTE: when adding more properties make sure you include them in custom-typings.d.ts
     new DefinePlugin({
-      'process.env': JSON.stringify(config.env),
+      'process.env': {
+        ENV: JSON.stringify(config.env.ENV),
+        ONLY_BUNDLE: config.env.ONLY_BUNDLE,
+        CONST_ENV_DEV: JSON.stringify(config.env.CONST_ENV_DEV),
+        CONST_ENV_PROD: JSON.stringify(config.env.CONST_ENV_PROD),
+        CONST_ENV_TEST: JSON.stringify(config.env.CONST_ENV_TEST),
+        BUNDLES: JSON.stringify(config.env.BUNDLES),
+      },
     }),
   ];
 
@@ -440,7 +447,7 @@ function buildPlugins() {
       * See: https://github.com/webpack/docs/wiki/optimization#multi-page-app
       */
       new webpack.optimize.CommonsChunkPlugin({
-        name: 'common',
+        name: config.dir.common,
       }),
 
       // Automatically move all modules defined outside of application directory to vendor bundle.

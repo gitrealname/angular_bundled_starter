@@ -19,7 +19,7 @@ export class TestController {
 
   // Methods
   activate() {
-    if (process.env.ENV === process.env.CONST.TEST_ENV) {
+    if (process.env.ENV === process.env.CONST_ENV_TEST) {
       return;
     }
     console.log(`controler '${this.name}' activated.`);

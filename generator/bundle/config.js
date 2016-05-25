@@ -4,7 +4,7 @@ import devCfg from './config.development.json';
 
 let exp = prodCfg;
 
-if (process.env.ENV === 'development') {
+if (process.env.ENV === process.env.CONST_ENV_DEV) {
   exp = devCfg;
 }
 
