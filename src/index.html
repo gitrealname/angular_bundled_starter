@@ -26,8 +26,8 @@
         template: [
           '<div ng-show="!$state.current.name || $state.current.name == rootStateName">',
             //'<center>',
-              <% for (let i=0; i < webpackConfig.metadata.env.BUNDLE_ENTRIES.length; i++) { %>
-                '<span><a ui-sref="<%= webpackConfig.metadata.env.BUNDLE_ENTRIES[i] %>"> <%= webpackConfig.metadata.env.BUNDLE_ENTRIES[i] %></a></span>&nbsp|',
+              <% for (let i=0; i < webpackConfig.metadata.env.APP_BUNDLES.length; i++) { %>
+                '<span><a ui-sref="<%= webpackConfig.metadata.env.APP_BUNDLES[i] %>"> <%= webpackConfig.metadata.env.APP_BUNDLES[i] %></a></span>&nbsp|',
               <% } %>
             //'</center>',
             '<hr/>',

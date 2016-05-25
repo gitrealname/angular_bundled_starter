@@ -410,6 +410,8 @@ function buildPlugins() {
         CONST_ENV_PROD: JSON.stringify(config.env.CONST_ENV_PROD),
         CONST_ENV_TEST: JSON.stringify(config.env.CONST_ENV_TEST),
         BUNDLES: JSON.stringify(config.env.BUNDLES),
+        BACKEND_SERVER_URL: JSON.stringify(config.env.BACKEND_SERVER_URL),
+        MOCK_SERVER_DIR: JSON.stringify(config.env.MOCK_SERVER_DIR),
       },
     }),
   ];
@@ -447,7 +449,7 @@ function buildPlugins() {
       * See: https://github.com/webpack/docs/wiki/optimization#multi-page-app
       */
       new webpack.optimize.CommonsChunkPlugin({
-        name: config.dir.common,
+        name: config.data.dir.common,
       }),
 
       // Automatically move all modules defined outside of application directory to vendor bundle.

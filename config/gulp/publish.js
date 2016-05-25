@@ -79,11 +79,21 @@ gulp.task('publish:only',
 
 
 gulp.task('publish:debug', 'Builds and publishes debug bundles.', () => {
+  config.setPublishingRootFromOrDefault('root');
   runSequence('build:debug', 'publish:only');
 });
 
 gulp.task('publish:release', 'Builds and publishes Release bundles.', () => {
+  config.setPublishingRootFromOrDefault('root');
   runSequence('build:release', 'publish:only');
 });
 
-gulp.task('publish', 'Default publish => Release', ['publish:release']);
+gulp.task('publish', 'Default publish => Release', ['publish:release'], () => { }, {
+  options: {
+    'root <destination-path>, -r <destination-path>': ['',
+          'Optional. Publishing destination path.',
+          'It is recommended to keep it relative to ' + config.root(),
+          'Default: ' + config.data.publish.root,
+    ].join('\n\t'),
+  },
+});

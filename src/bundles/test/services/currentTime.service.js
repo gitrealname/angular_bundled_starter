@@ -1,5 +1,5 @@
 
-export default class CurrentTime {
+export default class CurrentTimeService {
   constructor() {
     'ngInject';
   }

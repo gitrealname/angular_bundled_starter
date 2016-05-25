@@ -2,13 +2,16 @@ import './test.styl';
 import template from './test.html';
 
 export class TestController {
-  constructor(testDataService) {
+  constructor(testDataService, currentTimeService, configService) {
     'ngInject';
     this.testDataService = testDataService;
+    this.currentTimeService = currentTimeService;
+    this.configService = configService;
 
     //public
     this.name = 'test';
     this.dataList = [];
+    this.description = configService.get('test').description;
 
     //private
     this.creationTime = new Date();

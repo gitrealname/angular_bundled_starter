@@ -1,18 +1,21 @@
 import './test.styl';
 import angular from 'angular';
 import uiRouter from 'angular-ui-router';
-import Common from '../../common/common';
-import Components from './components/components';
-import Services from './services/services';
+import common from '../../common';
+import components from './components/components';
+import services from './services/services';
 import TestComponent from './test.component';
 import config from './config';
 
 export default angular.module('test', [
+  config.name,
   uiRouter,
-  Common.name,
-  Components.name,
-  Services.name,
+  common.name,
+  components.name,
+  services.name,
 ])
+
+.component('test', TestComponent)
 
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
@@ -42,10 +45,7 @@ export default angular.module('test', [
     },
   });
 })
-
-.component('test', TestComponent)
-
-.constant('config', config);
+;
 
 /*
 *  To use this bundle as page entry point, make html similar to this example:

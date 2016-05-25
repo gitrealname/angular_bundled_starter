@@ -1,11 +1,16 @@
 <!-- Place all UI elements intended to be present across all routes in this file -->
 <div class="test">
-  <img src="Content/images/yang-yin.jpg" alt="">
-  <section>
-    <h1>{{ vm.name }} header</h1>
-    <test-navbar></test-navbar>
+  <img src="AppContent/images/yang-yin.jpg" alt="">
   <section>
 
+    <hgroup>
+      <h1>{{ vm.name }} header</h1>
+      <h3> {{ vm.description }} </h3>
+    </hgroup>
+
+    <test-navbar>
+    </test-navbar>
+  <section>
   </section>
 
     <div ui-view>
@@ -17,7 +22,6 @@
     </div>
 
   </section>
-
   <section class="footer">
     <p>{{ vm.name }} footer</p>
   </section>

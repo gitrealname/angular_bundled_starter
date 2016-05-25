@@ -2,6 +2,9 @@
 export default ($q) => {
   'ngInject';
 
+  let backendServerUrl = process.env.BACKEND_SERVER_URL;
+  backendServerUrl = backendServerUrl.replace(/\/+$/, ''); //remove trailing '/'
+
   function request(cfg) {
     console.log(cfg);
     let fileSuffix = '';
@@ -10,12 +13,14 @@ export default ($q) => {
       cfg.method = 'GET';
     }
 
-    //cfg.url = '/' + process.env.MOCK_SERVER + '/'
-    cfg.url = '/' + 'mock.server' + '/'
-      + cfg.url.replace(/^\/+/, '')
-      + fileSuffix
-      + '.json';
+    let url = cfg.url.replace(/^\/+/, '');
+    if (backendServerUrl) {
+      url = backendServerUrl + '/' + url;
+    } else {
+      url = '/' + process.env.MOCK_SERVER_DIR + '/' + url + fileSuffix + '.json';
+    }
 
+    cfg.url = url;
     return cfg;
   }
 

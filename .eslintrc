@@ -25,6 +25,7 @@
         "no-use-before-define": 0,
         "no-useless-concat": 0,
         "prefer-template":0,
+        "keyword-spacing":1,
         "quotes": ["error", "single", {"allowTemplateLiterals": true}]
     }
 }

@@ -34,8 +34,8 @@ const node = 'node_modules';
 const generator = 'generator';
 const bundles = 'bundles';
 const common = 'common';
-const assets = 'Content';
-const devData = 'mock.server';
+const assets = 'AppContent';
+const mockServer = 'mock.server';
 const config = 'config';
 
 const data = {
@@ -48,7 +48,7 @@ const data = {
     config,
     //relative to src
     assets,
-    devData,
+    mockServer,
     common,
     bundles,
   },
@@ -64,9 +64,9 @@ const data = {
   publish: {
     root: '../ngWebpackMvc4/ngWebpackMvc4', //relative to root or absolute path
     //relative to publish root
-    content: 'Content',
-    styles: 'Content/app',
-    scripts: 'Scripts/app',
+    content: assets,
+    styles: assets,
+    scripts: 'AppScripts',
   },
   env: {
     prod: 'production',
@@ -82,9 +82,7 @@ const data = {
     host: 'localhost',
     port: 3000,
     url: 'DEFINED BELOW!',
-    requestServerHost: 'http://localhost',
-    requestServerPort: '19010',
-    requestServerRoot: '/webapp',
+    defaultBackendServerUrl: 'http://localhost:19010/webapp',
   },
   test: {
     port: 3666,
@@ -96,19 +94,21 @@ const data = {
 };
 exports.data = data;
 
+data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
+
 const env = {
   ENV: data.env.prod,
   BUILD: data.build.release,
   ONLY_BUNDLE: '<flag, is set to true if only one bundle (common is not counted) is specified>',
   BUNDLES: '<explicetly specified (by --name param) list of bundles>',
-  BUNDLE_ENTRIES: '<all resolved bundles excluding common>',
+  APP_BUNDLES: '<all resolved bundles excluding common>',
   CONST_ENV_TEST: data.env.test,
   CONST_ENV_PROD: data.env.prod,
   CONST_ENV_DEV: data.env.dev,
+  BACKEND_SERVER_URL: '', //url that all http requests will be sent to. keep it empty to serve data from mock.server
+  MOCK_SERVER_DIR: data.dir.mockServer,
 };
 exports.env = env;
-
-data.dev.url = 'http://' + data.dev.host + ':' + data.dev.port;
 
 /*
 * Helper functions
@@ -154,13 +154,14 @@ function rootSrc(args) {
 }
 exports.rootSrc = rootSrc;
 
+let currentPulishingRoot = data.publish.root;
 function rootPublish(args) {
   args = Array.prototype.slice.call(arguments, 0);
-  let dir = path.resolve('', data.publish.root);
+  let dir = path.resolve('', currentPulishingRoot);
   if (!dirExists(dir)) {
-    dir = root(data.publish.root);
+    dir = root(currentPulishingRoot);
     if (!dirExists(dir)) {
-      warn('Unable to resolve path "' + data.publish.root + '"');
+      warn('Unable to resolve path "' + currentPulishingRoot + '"');
       error('Publishing root directory must exist');
     }
   }
@@ -168,6 +169,19 @@ function rootPublish(args) {
   return ret;
 }
 exports.rootPublish = rootPublish;
+
+function setPublishingRootFromOrDefault(cmdParamName) {
+  const r = getProcessingFlag(cmdParamName);
+  if (r !== undefined) {
+    currentPulishingRoot = data.dev.defaultBackendServerUrl;
+    if (r.length) {
+      currentPulishingRoot = r;
+    }
+  }
+  info('Publishing root: ' + currentPulishingRoot);
+  return currentPulishingRoot;
+}
+exports.setPublishingRootFromOrDefault = setPublishingRootFromOrDefault;
 
 function getProcessingFlag(paramName) {
   if (paramName === undefined) {
@@ -280,6 +294,21 @@ function looseNameToXCase(val, caseType, dropSuffix = true) {
 }
 exports.looseNameToXCase = looseNameToXCase;
 
+function setBackendServerUrlFromOrDefault(cmdParamName) {
+  const srv = getProcessingFlag(cmdParamName);
+  if (srv !== undefined) {
+    env.BACKEND_SERVER_URL = data.dev.defaultBackendServerUrl;
+    if (srv.length) {
+      env.BACKEND_SERVER_URL = srv;
+    }
+    info('Backend server: ' + env.BACKEND_SERVER_URL);
+  } else {
+    info('Backend server: MOCK SERVER');
+  }
+  return env.BACKEND_SERVER_URL;
+}
+exports.setBackendServerUrlFromOrDefault = setBackendServerUrlFromOrDefault;
+
 /*
 * Process command line parameters and create halping data sets
 */
@@ -332,15 +361,18 @@ srcDirs.filter((d) => {
   const lst = d.split('/');
   let ret = false;
   let fileSuffix = '';
+  let indexFileSuffix = '';
   let key;
   let isCommon = false;
   if (d.indexOf(common) === 0 && lst.length === 1) {
+    indexFileSuffix = d + '/index';
     fileSuffix = d + '/' + d;
     isCommon = true;
     key = common;
     ret = true;
   } else if (d.indexOf(bundles) === 0 && lst.length === 2) {
     if (!fileNames.length || fileNames.indexOf(lst[1]) >= 0) {
+      indexFileSuffix = d + '/index';
       fileSuffix = d + '/' + lst[1];
       key = looseNameToXCase(lst[1], camelCase);
       ret = true;
@@ -348,18 +380,30 @@ srcDirs.filter((d) => {
   }
   if (ret) {
     const extList = ['.js', '.ts'];
-    const entryExt = extList.filter((v) => fileExists(rootSrc(fileSuffix + v)));
-    if (!entryExt.length) {
+
+    const possibleEntryFiles = extList.reduce((prev, ext) => {
+      if (fileExists(rootSrc(fileSuffix + ext))) {
+        prev.push(fileSuffix + ext);
+      } else if (fileExists(rootSrc(indexFileSuffix + ext))) {
+        prev.push(indexFileSuffix + ext);
+      }
+      return prev;
+    }, []);
+    if (possibleEntryFiles.length > 1) {
+      error('Multiple entries: ' + d);
+    }
+
+    if (![possibleEntryFiles].length) {
       ret = false;
     } else {
-      entryMap[key] = { script: fileSuffix + entryExt[0], html: fileSuffix + '.html', isCommon };
+      entryMap[key] = { script: possibleEntryFiles[0], html: fileSuffix + '.html', isCommon };
     }
   }
   return ret;
 });
 data.entryMap = entryMap;
 
-env.BUNDLE_ENTRIES = Object.keys(entryMap).filter((v) => v !== common);
+env.APP_BUNDLES = Object.keys(entryMap).filter((v) => v !== common);
 
 //debugInspectAndExit(dirMap);
 //debugInspectAndExit(srcDirs);

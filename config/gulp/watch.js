@@ -28,10 +28,11 @@ function prependEntriesWithHotMiddleware(entry) {
 
 const defaultRequestUrlRoot = config.data.dev.requestServerHost + ':' + config.data.dev.requestServerPort + config.data.dev.requestServerRoot;
 
-gulp.task('watch', 'run dev server with "hot replacement"', () => {
+gulp.task('watch', 'Run dev server with "hot replacement"', () => {
   config.setEnvDev();
+  config.setBackendServerUrlFromOrDefault('server');
+
   const webpackConfig = webpackBuilder.buildConfig();
-  //attemp to find out why page reload doesn't happen: const webpackConfig = require('../webpack.dev.config');
   prependEntriesWithHotMiddleware(webpackConfig.entry);
 
   //config.debugInspectAndExit(webpackConfig);
@@ -67,18 +68,16 @@ gulp.task('watch', 'run dev server with "hot replacement"', () => {
           'Optional. If specified, opens default browser with development server url.',
     ].join('\n\t'),
     'server [<URL root>], -s [<URL root>]': ['',
-          'TBD: Optional. Url where all http requests will be re-directed to.',
-          'When not specified, all requests get processed by webpack-dev-server',
-          ' relative to \'' + config.data.dir.devData + '\'.',
-          'Optional <URL root> defines default request Url root.',
-          'If <Url root> is not specified. \'' + defaultRequestUrlRoot + '\' will be used.',
-          'It works in conjunction with \'common/services/requestProxy.service\'',
-          ' which adjusts URLs depending on environment and specified parameter.',
-          'Example, assuming \'--server ' + defaultRequestUrlRoot + '\':',
-          ' $http.get(/MyArea/SpecialController/DataAction) ==> ' + defaultRequestUrlRoot + '/MyArea/SpecialController/DataAction',
-          'Example, assuming that \'--server\' (no parameter value):',
-          ' $http.get(/MyArea/SpecialController/DataAction) ==> ' + config.data.dev.url + '/' + config.data.dir.devData + '/MyArea/SpecialController/DataAction',
-          'NOTE: when --server is not specified, \'common/services/requestProxy.service\' changes all POST, PUT, DELETE methods into GET.',
+          'Use Backend server for http requests.',
+          'If not specified, all http request are processed by internal web server.',
+          'Optional <URL root> determines backend server url root. Default: ' + config.data.dev.defaultBackendServerUrl,
+          'When not specified. The internal web server serves data from "src/' + config.data.dir.mockServer + '".',
+          'The Intrnal web server works in conjunction with "src/common/dev-service/requestMockServerProxy interceptor"',
+          'The interceptor adjust url to point to json file that is located under directory that is named the same as request string',
+          'All requests converted to GET request, but file name suffix will reflect original method name.',
+          'Examples:',
+          '   for $http.get(\'MyArea/SpecialController/GetXYZModel\') file "src/' + config.data.dir.mockServer + '/MyArea/SpecialController/GetXYZModel.json" will be sent back as a response;',
+          '   for $http.put(....UpdateEntity...) <= "....UpdateEntity.PUT.json";',
     ].join('\n\t'),
   },
 });
