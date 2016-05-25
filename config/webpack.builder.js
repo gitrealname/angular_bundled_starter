@@ -47,8 +47,6 @@ function buildOutput() {
   let path = config.root(config.data.dest.prod);
   let publicPath = '';
   let suffix = '.';
-  //WORING ON THIS! due to Module not found:
-  //Error: Can't resolve './Content/images/yang-yin.jpg' in 'D:\work\ngLtssStarter\src\bundles\test'
   if (config.isEnvDev() || config.isEnvTest()) {
     path = config.rootSrc();
     publicPath = '/';

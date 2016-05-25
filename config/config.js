@@ -91,6 +91,7 @@ const data = {
     'DEFINED BELOW!': 1,
   },
   currentDest: '< one of the data.dest, determined based on env>',
+  nameList: '<list of all --name param values without processing>',
 };
 exports.data = data;
 
@@ -120,6 +121,14 @@ function debugInspectAndExit(...args) {
   process.exit(1);
 }
 exports.debugInspectAndExit = debugInspectAndExit;
+
+function inspect(...args) {
+  args.forEach((o) => {
+    console.log(util.inspect(o, { colors: true, depth: 10, showHidden: false }));
+  });
+}
+exports.inspect = inspect;
+
 //debugInspectAndExit(argv);
 
 function error(...arg) {
@@ -249,50 +258,63 @@ function firstCharToLowerCase(val) {
 }
 exports.firstCharToLowerCase = firstCharToLowerCase;
 
-function dushedNameToChunks(val) {
-  const s = val.split('-');
-  return s;
-}
-exports.dushedNameToChunks = dushedNameToChunks;
-
-function camelCaseNameToLowerCaseChunks(val) {
-  let s = val.replace(/([A-Z]+[0-9]?)(?=[A-Z\.\-]|$)/g, (x) => { //AAABcTestDDD => _aaa_BcTest_ddd_
-    return '_' + x.toLowerCase() + '_';
+function splitName(val) {
+  let s = val.replace(/([A-Z]+[0-9]?)(?=[A-Z\.\-\\]|$)/g, (x) => { //AAABcTestDDD => _aaa_BcTest_ddd_
+    return '_' + x + '_';
   });
-  s = s.replace(/([A-Z])/g, (x) => '_' + x.toLowerCase()); //_aaa_BcTest_ddd_ => _aaa__bc_test_ddd_
-  s = s.replace(/^_+/, '').replace(/_+$/, '').replace(/_+/g, '_'); //_aaa__bc_test_ddd_ => aaa_bc_test_ddd
+  s = s.replace(/([A-Z])/g, (x) => '_' + x); //_aaa_BcTest_ddd_ => _aaa__Bc_Test_ddd_
+  s = s.replace(/^_+/, '').replace(/_+$/, '').replace(/_+/g, '_'); //_aaa__Bc_Test_ddd_ => aaa_Bc_Test_ddd
   s = s.split('_');
   return s;
 }
-exports.camelCaseNameToLowerCaseChunks = camelCaseNameToLowerCaseChunks;
+exports.splitName = splitName;
 
 const camelCase = 1;
 exports.camelCase = camelCase; //first work lower case and the rest are capCase
-const capCase = 2;
-exports.capCase = capCase; //fist letter of each word is capitalized
+const camelCapCase = 2;
+exports.camelCapCase = camelCapCase; //fist letter of each word is capitalized
 const lowerCase = 3;
 exports.lowerCase = lowerCase; //all letters in lower case
+const upperCase = 4; //ALL CAP
+exports.upperCase = upperCase;
 
-function looseNameToXCase(val, caseType, dropSuffix = true) {
-  val = val.replace('.', '-');
-  val = dushedNameToChunks(val);
-  val = val.map((v) => firstCharToUpperCase(v));
+function nameToChunks(name, caseType, dropSuffix) {
+  if (!name) {
+    return [];
+  }
+  const lst = splitName(name);
+  const ret = lst.map((v, idx) => {
+    if (caseType === camelCase) {
+      if (idx === 0) {
+        v = firstCharToLowerCase(v);
+      } else {
+        v = firstCharToUpperCase(v);
+      }
+    } else if (caseType === camelCapCase) {
+      v = firstCharToUpperCase(v);
+    } else if (caseType === lowerCase) {
+      v = v.toLowerCase();
+    } else if (caseType === upperCase) {
+      v = v.toUpperCase();
+    } else if (caseType === undefined) {
+      return v;
+    } else {
+      error('nameToChunks(): invalid case type: ' + caseType);
+    }
+    return v;
+  });
+
   if (dropSuffix) {
-    let last = val.pop();
-    last = last.replace(/(service|directive|component|interceptor|controller|filter)$/i, '');
+    let last = ret.pop();
+    last = last.replace(/(service|directive|component|interceptor|controller|filter|module|bundle)$/i, '');
     if (last.length) {
-      val.push(last);
+      ret.push(last);
     }
   }
-  let str = val.join('');
-  if (caseType === camelCase) {
-    str = firstCharToLowerCase(str);
-  } else if (caseType === lowerCase) {
-    str = str.toLowerCase();
-  }
-  return str;
+
+  return ret;
 }
-exports.looseNameToXCase = looseNameToXCase;
+exports.nameToChunks = nameToChunks;
 
 function setBackendServerUrlFromOrDefault(cmdParamName) {
   const srv = getProcessingFlag(cmdParamName);
@@ -313,34 +335,24 @@ exports.setBackendServerUrlFromOrDefault = setBackendServerUrlFromOrDefault;
 * Process command line parameters and create halping data sets
 */
 const names = [].concat(getProcessingFlag('name') || []);
-//--name xyz-special-service --name TestAbout => [xyzSpecialService, testAbout]
-const formalNames = names.map((n) => looseNameToXCase(n, camelCase, false));
-//--name aa-bb --name AbCd --name xyzAbcService => [aaBb, abCd, xyzAbc]
-const camelCaseNormalizedNames = names.map((n) => looseNameToXCase(n, camelCase));
-//--name aa-bb --name ABCd --name xyzABCService => [aa-bb, ab-cd, xyz-abc]
-const fileNames = camelCaseNormalizedNames.map((v) => camelCaseNameToLowerCaseChunks(v).join('-'));
+data.nameList = names;
 
 //all explicetly listed bundle dir names converted according to fileName convention.
-const explicitBundleDirNames = fileNames.filter((v) => dirExists(rootSrc(bundles, v)) || v.toLowerCase() === 'common');
-env.BUNDLES = explicitBundleDirNames;
+const listedBundleNames = names
+  .map((v) => nameToChunks(v, lowerCase).join('-'))
+  .filter((v) => dirExists(rootSrc(bundles, v)) || v.toLowerCase() === 'common');
+env.BUNDLES = listedBundleNames;
 
 let nonCommonBundleCount = 0;
-let masterBundleCamelCaseNormalizedName = explicitBundleDirNames.reduce((prev, v) => {
+const masterBundle = listedBundleNames.reduce((prev, v) => {
   if (v.toLowerCase() === common) {
     return prev;
   }
   nonCommonBundleCount++;
   return (!!prev) ? prev : v;
 }, '');
-masterBundleCamelCaseNormalizedName = looseNameToXCase(masterBundleCamelCaseNormalizedName, camelCase);
 //is only bundle?
 env.ONLY_BUNDLE = nonCommonBundleCount === 1;
-
-//prepare additional constants for generator
-const parents = [].concat(getProcessingFlag('parent') || []);
-const parentChunks = parents.length ? parents[0].split(/[\/\\]+/) : [];
-const parentDirNameChunks = parentChunks.map((v) => camelCaseNameToLowerCaseChunks(looseNameToXCase(v, camelCase)).join('-'));
-const parentDirNameChunksReduced = parentDirNameChunks.filter((v) => v !== 'components' && v !== bundles);
 
 /*
 * Prepare webpack Entry map
@@ -371,10 +383,10 @@ srcDirs.filter((d) => {
     key = common;
     ret = true;
   } else if (d.indexOf(bundles) === 0 && lst.length === 2) {
-    if (!fileNames.length || fileNames.indexOf(lst[1]) >= 0) {
+    if (!listedBundleNames.length || listedBundleNames.indexOf(lst[1]) >= 0) {
       indexFileSuffix = d + '/index';
       fileSuffix = d + '/' + lst[1];
-      key = looseNameToXCase(lst[1], camelCase);
+      key = nameToChunks(lst[1], camelCase).join('');
       ret = true;
     }
   }
@@ -408,6 +420,7 @@ env.APP_BUNDLES = Object.keys(entryMap).filter((v) => v !== common);
 //debugInspectAndExit(dirMap);
 //debugInspectAndExit(srcDirs);
 //debugInspectAndExit(entryMap);
+//debugInspectAndExit(env);
 
 function pathDiffToRelativePath(srcPath, destPath) {
   srcPath = path.resolve(srcPath);

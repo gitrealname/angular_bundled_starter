@@ -1,19 +1,27 @@
 /*eslint no-unused-expressions: "off"*/
 /*eslint no-unused-vars: "off"*/
 /*global describe it beforeEach inject expect angular mocks*/
-import TestModule from './test';
+import testModule from './';
 import TestComponent, { TestController } from './test.component';
-import TestTemplate from './test.html';
+import testTemplate from './test.html';
+
+class FakeConfigService {
+  get(key) {
+    return {
+      description: 'test description',
+    };
+  }
+}
 
 describe('Test component', () => {
   let $rootScope;
   let makeController;
 
-  beforeEach(window.module(TestModule.name));
+  beforeEach(window.module(testModule.name));
   beforeEach(inject((_$rootScope_) => {
     $rootScope = _$rootScope_;
     makeController = () => {
-      return new TestController();
+      return new TestController(undefined, undefined, new FakeConfigService());
     };
   }));
 
@@ -33,7 +41,7 @@ describe('Test component', () => {
     // template specs
     // tip: use regex to ensure correct bindings are used e.g., {{  }}
     it('has name in template [REMOVE]', () => {
-      expect(TestTemplate).to.match(/{{\s?vm\.name\s?}}/g);
+      expect(testTemplate).to.match(/{{\s?vm\.name\s?}}/g);
     });
   });
 
@@ -42,7 +50,7 @@ describe('Test component', () => {
     const component = TestComponent;
 
     it('includes the intended template', () => {
-      expect(component.template).to.equal(TestTemplate);
+      expect(component.template).to.equal(testTemplate);
     });
 
     it('uses `controllerAs` syntax', () => {
