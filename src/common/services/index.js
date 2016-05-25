@@ -1,11 +1,11 @@
 import angular from 'angular';
-import TodoList from './todoList.service';
 import requestUrlCorrectionInterceptor from './request-url-correction.interceptor';
+import configServiceProvider from './config.provider';
 
 const commonServicesModule = angular.module('common.services', [
 ])
 
-.service('todoList', TodoList)
+.provider('configService', configServiceProvider)
 
 .config(['$httpProvider', ($httpProvider) => {
   $httpProvider.interceptors.push(requestUrlCorrectionInterceptor);

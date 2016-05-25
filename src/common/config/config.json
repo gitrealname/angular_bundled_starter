@@ -1,0 +1,6 @@
+{
+    "env": "production",
+    "remove": {
+        "value": "test"
+    }
+}
