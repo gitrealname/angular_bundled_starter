@@ -103,6 +103,7 @@ const env = {
   ONLY_BUNDLE: '<flag, is set to true if only one bundle (common is not counted) is specified>',
   BUNDLES: '<explicetly specified (by --name param) list of bundles>',
   APP_BUNDLES: '<all resolved bundles excluding common>',
+  APP_BUNDLE_MODULES: '<list of app bundles ng module names>',
   CONST_ENV_TEST: data.env.test,
   CONST_ENV_PROD: data.env.prod,
   CONST_ENV_DEV: data.env.dev,
@@ -263,7 +264,7 @@ function splitName(val) {
     return '_' + x + '_';
   });
   s = s.replace(/([A-Z])/g, (x) => '_' + x); //_aaa_BcTest_ddd_ => _aaa__Bc_Test_ddd_
-  s = s.replace(/^_+/, '').replace(/_+$/, '').replace(/_+/g, '_'); //_aaa__Bc_Test_ddd_ => aaa_Bc_Test_ddd
+  s = s.replace(/^_+/, '').replace(/_+$/, '').replace(/[_\-]+/g, '_'); //_aaa__Bc_Test_ddd_ => aaa_Bc_Test_ddd
   s = s.split('_');
   return s;
 }
@@ -416,6 +417,9 @@ srcDirs.filter((d) => {
 data.entryMap = entryMap;
 
 env.APP_BUNDLES = Object.keys(entryMap).filter((v) => v !== common);
+env.APP_BUNDLE_MODULES = env.APP_BUNDLES.map((v) => {
+  return nameToChunks(v, camelCase, false).join('');
+});
 
 //debugInspectAndExit(dirMap);
 //debugInspectAndExit(srcDirs);

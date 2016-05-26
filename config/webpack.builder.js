@@ -32,8 +32,9 @@ function buildMetadata() {
     title: 'Modular Angular-Webpack kit',
     env: config.env,
     baseUrl: '/',
-    ngModulesList: '\'' + Object.keys(config.data.entryMap).join('\', \'') + '\'',
+    ngModulesList: '\'' + config.env.APP_BUNDLE_MODULES.join('\', \'') + '\'',
   };
+  //config.debugInspectAndExit(ret);
   return ret;
 }
 module.exports.buildMetadata = buildMetadata;

@@ -2,7 +2,7 @@
 /*eslint no-unused-vars: "off"*/
 /*global describe it beforeEach inject expect angular mocks*/
 import <%= camelName %>Module from './';
-import <%= camelName %>Component, {   <%= camelCapName %>Controller } from './<%= lispName %>.component';
+import <%= camelName %>Component, { <%= camelCapName %>Controller } from './<%= lispName %>.component';
 import <%= camelName %>Template from './<%= lispName %>.html';
 
 class FakeConfigService {
@@ -17,7 +17,7 @@ describe(' <%= dotedCamelCapFullName %> component', () => {
   let $rootScope;
   let makeController;
 
-  beforeEach(window.module(testModule.name));
+  beforeEach(window.module(<%= camelName %>Module.name));
   beforeEach(inject((_$rootScope_) => {
     $rootScope = _$rootScope_;
     makeController = () => {

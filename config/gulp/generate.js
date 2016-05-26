@@ -142,13 +142,11 @@ gulp.task('generate:bundle', () => {
 });
 
 gulp.task('generate:component', () => {
-  config.error('Component generation is not yet implemented');
-  //return generate('component');
+  return generate('component');
 });
 
 gulp.task('generate:service', () => {
-  config.error('Service generation is not yet implemented');
-  //return generate('service');
+  return generate('service');
 });
 
 gulp.task('generate:directive', () => {

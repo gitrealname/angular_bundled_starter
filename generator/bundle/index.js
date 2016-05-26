@@ -20,7 +20,6 @@ export default angular.module('<%= dotedCamelFullName %>', [
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
 
-  // Having '^' in front prevents double '/' when used along with other bundles
   let url = '/<%= lispName %>';
   if (process.env.ONLY_BUNDLE || process.env.ENV === process.env.CONST_ENV_PROD) {
     /*

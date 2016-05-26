@@ -1,17 +1,43 @@
-import './<%= lcName %>.styl';
-import template from './<%= lcName %>.html';
+import './<%= lispName %>.styl';
+import template from './<%= lispName %>.html';
 
-export class <%= pName %>Controller {
-  constructor() {
+export class <%= camelCapName %>Controller {
+  constructor(configService) {
     'ngInject';
-    this.name = '<%= cFullName %>';
+    //initialize
+    this.<%= camelName %>Service = <%= camelName %>Service;
+    this.configService = configService;
+
+    //public
+    this.name = '<%= camelFullName %>';
+    this.description = 'loading from config...';
+    this.creationTime = new Date();
+
+    //private
+    this.myPrivateVar = new Date();
   }
-}
+
+  /*
+  * Event handlers
+  */
+  $onInit() {
+    this.description = this.configService.get('<%= camelName %>').description || 'no description';
+    console.log(`component '${this.name}' activated.`);
+  }
+
+  $onDestroy() {
+    console.log(`component '${this.name}' destroyed.`);
+  }
+
+  /*
+  * Methods
+  */
+} // TestController
 
 export default {
-  restrict: 'E',
   bindings: {},
+  transclude: false,
   template,
-  controller: <%= pName %>Controller,
+  controller: <%= camelCapName %>Controller,
   controllerAs: 'vm',
 };
