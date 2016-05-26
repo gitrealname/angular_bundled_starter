@@ -1,6 +1,12 @@
 /*eslint no-unused-expressions: "off"*/
 /*eslint no-unused-vars: "off"*/
 /*global describe it beforeEach inject expect angular mocks*/
+
+/*
+* Useful links regarding unit-testing:
+* See: https://gist.github.com/yoavniran/1e3b0162e1545055429e
+*/
+
 import <%= camelName %>Module from './';
 import <%= camelName %>Component, { <%= camelCapName %>Controller } from './<%= lispName %>.component';
 import <%= camelName %>Template from './<%= lispName %>.html';
