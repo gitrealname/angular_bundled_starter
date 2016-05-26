@@ -1,5 +1,6 @@
 import './<%= lispName %>.styl';
 import angular from 'angular';
+import uiRouter from 'angular-ui-router';
 import <%= camelName %>Component from './<%= lispName %>.component';
 
 export default angular.module('<%= dotedCamelFullName %>', [

@@ -5,7 +5,6 @@ export class <%= camelCapName %>Controller {
   constructor(configService) {
     'ngInject';
     //initialize
-    this.<%= camelName %>Service = <%= camelName %>Service;
     this.configService = configService;
 
     //public
@@ -21,7 +20,7 @@ export class <%= camelCapName %>Controller {
   * Event handlers
   */
   $onInit() {
-    this.description = this.configService.get('<%= camelName %>').description || 'no description';
+    this.description = 'no description';
     console.log(`component '${this.name}' activated.`);
   }
 
