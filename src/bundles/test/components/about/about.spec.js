@@ -1,7 +1,7 @@
 /*eslint no-unused-expressions: "off"*/
 /*eslint no-unused-vars: "off"*/
 /*global describe it beforeEach inject expect angular mocks*/
-import AboutModule from './about';
+import AboutModule from './';
 import AboutComponent, { AboutController } from './about.component';
 import AboutTemplate from './about.html';
 

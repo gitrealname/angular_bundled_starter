@@ -4,6 +4,7 @@ import template from './test.html';
 export class TestController {
   constructor(testDataService, currentTimeService, configService) {
     'ngInject';
+    //initialize
     this.testDataService = testDataService;
     this.currentTimeService = currentTimeService;
     this.configService = configService;
@@ -12,24 +13,29 @@ export class TestController {
     this.name = 'test';
     this.dataList = [];
     this.description = configService.get('test').description;
-
-    //private
     this.creationTime = new Date();
 
-    //initialize
-    this.activate();
+    //private
+    this.myPrivateVar = new Date();
   }
 
-  // Methods
-  activate() {
-    if (process.env.ENV === process.env.CONST_ENV_TEST) {
-      return;
-    }
-    console.log(`controler '${this.name}' activated.`);
+  /*
+  * Event handlers
+  */
+  $onInit() {
+    this.description = this.configService.get('test').description;
+    console.log(`component '${this.name}' activated.`);
   }
 
+  $onDestroy() {
+    console.log(`component '${this.name}' destroyed.`);
+  }
+
+  /*
+  * Methods
+  */
+  //get test model
   onGetData() {
-    //get test model
     this.testDataService.getModel().then((result) => {
       this.dataList = result.dataList || ['ERROR'];
     });
@@ -37,8 +43,8 @@ export class TestController {
 } // TestController
 
 export default {
-  restrict: 'E',
   bindings: {},
+  transclude: false,
   template,
   controller: TestController,
   controllerAs: 'vm',

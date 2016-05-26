@@ -1,6 +1,6 @@
 import angular from 'angular';
 import uiRouter from 'angular-ui-router';
-import AboutComponent from './about.component';
+import aboutComponent from './about.component';
 
 export default angular.module('test.about', [
   uiRouter,
@@ -8,11 +8,7 @@ export default angular.module('test.about', [
 
 .config(($stateProvider) => {
   'ngInject';
-  let url = '/about';
-  if (process.env.ONLY_BUNDLE || process.env.ENV === process.env.CONST_ENV_PROD) {
-    // Having '^' prevents double '/' when parent state url is '/'
-    url = '^/about';
-  }
+  const url = '/about';
   $stateProvider.state('test.about', {
     component: 'testAbout',
     url,
@@ -23,4 +19,4 @@ export default angular.module('test.about', [
   });
 })
 
-.component('testAbout', AboutComponent);
+.component('testAbout', aboutComponent);

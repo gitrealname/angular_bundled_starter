@@ -1,7 +1,7 @@
 /*eslint no-unused-expressions: "off"*/
 /*eslint no-unused-vars: "off"*/
 /*global describe it beforeEach inject expect angular mocks*/
-import NavbarModule from './navbar';
+import NavbarModule from './';
 import NavbarComponent, { NavbarController } from './navbar.component';
 import NavbarTemplate from './navbar.html';
 

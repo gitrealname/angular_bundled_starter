@@ -2,9 +2,9 @@ import './test.styl';
 import angular from 'angular';
 import uiRouter from 'angular-ui-router';
 import common from '../../common';
-import components from './components/components';
-import services from './services/services';
-import TestComponent from './test.component';
+import components from './components';
+import services from './services';
+import testComponent from './test.component';
 import config from './config';
 
 export default angular.module('test', [
@@ -15,13 +15,13 @@ export default angular.module('test', [
   services.name,
 ])
 
-.component('test', TestComponent)
+.component('test', testComponent)
 
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
 
   // Having '^' in front prevents double '/' when used along with other bundles
-  let url = '^/test';
+  let url = '/test';
   if (process.env.ONLY_BUNDLE || process.env.ENV === process.env.CONST_ENV_PROD) {
     /*
     * none-html5mode by default. For details

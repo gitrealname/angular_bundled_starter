@@ -25,8 +25,8 @@ function createGeneratorTemplateParams(componentType) {
     lispFullName: 'parent-another-parent-my-component-abc-special', //no suffix
 
     destDirSuffix: '<depends on componentType param>', //either components, services, directives, bundles
-    slushedLispFullDir: 'parent/another-parent/<dest-dir-suffix>/my-component',
-    slushedLispParentDir: 'parent/another-parent/',
+    slashedLispFullDir: 'parent/another-parent/<dest-dir-suffix>/my-component',
+    slashedLispParentDir: 'parent/another-parent/',
 
     lispBundleName: '',
     bundleRootRelativePath: './',
@@ -84,20 +84,20 @@ function createGeneratorTemplateParams(componentType) {
     parentNameChunksWithComponents = [data.dir.bundles];
     tmpl.lispBundleName = tmpl.lispName;
   }
-  tmpl.slushedLispParentDir = parentNameChunksWithComponents.map((v) => {
+  tmpl.slashedLispParentDir = parentNameChunksWithComponents.map((v) => {
     return config.nameToChunks(v, config.lowerCase, true).join('-');
   }).join('/');
-  tmpl.slushedLispFullDir = tmpl.slushedLispParentDir;
+  tmpl.slashedLispFullDir = tmpl.slashedLispParentDir;
   if (tmpl.destDirSuffix) {
-    tmpl.slushedLispFullDir += '/' + tmpl.destDirSuffix;
+    tmpl.slashedLispFullDir += '/' + tmpl.destDirSuffix;
   }
   if (componentType === 'component' || componentType === 'directive') {
-    tmpl.slushedLispFullDir += '/' + tmpl.lispName;
+    tmpl.slashedLispFullDir += '/' + tmpl.lispName;
   }
-  tmpl.slushedLispFullDir = tmpl.slushedLispFullDir.replace(/[\/]+/g, '/');
+  tmpl.slashedLispFullDir = tmpl.slashedLispFullDir.replace(/[\/]+/g, '/');
 
   //calculate parent relative name
-  const len = tmpl.slushedLispFullDir.split('/').length - (isDestinationCommon ? 1 : 2);
+  const len = tmpl.slashedLispFullDir.split('/').length - (isDestinationCommon ? 1 : 2);
   if (componentType !== 'bundle') {
     tmpl.bundleRootRelativePath = '../'.repeat(len);
   }
@@ -117,11 +117,11 @@ function generate(componentType) {
   process.exit(1);
 
   //Generate
-  const destPath = config.rootSrc(tmpl.slushedLispFullDir);
+  const destPath = config.rootSrc(tmpl.slashedLispFullDir);
   return gulp.src(config.rootGenerator(componentType + '/**/*.**'))
     .pipe(template(tmpl))
     .pipe(rename((p) => {
-      p.basename = p.basename.replace('temp', tmpl.lcName);
+      p.basename = p.basename.replace('temp', tmpl.lispName);
     }))
     .pipe(gulp.dest(destPath));
 }

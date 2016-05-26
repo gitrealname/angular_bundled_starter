@@ -8,8 +8,8 @@ export class NavbarController {
 }
 
 export default {
-  restrict: 'E',
   bindings: {},
+  transclude: false,
   template,
   controller: NavbarController,
   controllerAs: 'vm',
