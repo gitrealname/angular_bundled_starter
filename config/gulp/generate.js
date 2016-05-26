@@ -22,7 +22,9 @@ function createGeneratorTemplateParams(componentType) {
     suffix: '<depends on componentType param', //either of Component, Service, Directive, ....
 
     dotedCamelCapFullName: 'Parent.AnotherParent.MyComponentABCSpecial', // no suffix
+    dotedCamelFullName: 'parent.anotherParent.myComponentAbcSpecial',
     lispFullName: 'parent-another-parent-my-component-abc-special', //no suffix
+    camelFullName: 'parentAnotherParentMyComponentAbcSpecial',
 
     destDirSuffix: '<depends on componentType param>', //either components, services, directives, bundles
     slashedLispFullDir: 'parent/another-parent/<dest-dir-suffix>/my-component',
@@ -61,9 +63,18 @@ function createGeneratorTemplateParams(componentType) {
     return config.nameToChunks(v, config.camelCapCase, true).join('');
   }).concat(tmpl.camelCapName).join('.');
 
+  tmpl.dotedCamelFullName = parentNameChunks.map((v) => {
+    return config.nameToChunks(v, config.camelCase, true).join('');
+  }).concat(tmpl.camelName).join('.');
+
   tmpl.lispFullName = parentNameChunks.map((v) => {
     return config.nameToChunks(v, config.lowerCase, true).join('-');
   }).concat(tmpl.lispName).join('-');
+
+  tmpl.camelFullName = parentNameChunks.map((v) => {
+    return config.nameToChunks(v, config.camelCapCase, true).join('');
+  }).concat(tmpl.camelCapName).join('');
+  tmpl.camelFullName = config.firstCharToLowerCase(tmpl.camelFullName);
 
   //inject word 'components' between each parent
   let parentNameChunksWithComponents = parentNameChunks.reduce((prev, v) => {
@@ -91,7 +102,7 @@ function createGeneratorTemplateParams(componentType) {
   if (tmpl.destDirSuffix) {
     tmpl.slashedLispFullDir += '/' + tmpl.destDirSuffix;
   }
-  if (componentType === 'component' || componentType === 'directive') {
+  if (componentType === 'component' || componentType === 'directive' || componentType === 'bundle') {
     tmpl.slashedLispFullDir += '/' + tmpl.lispName;
   }
   tmpl.slashedLispFullDir = tmpl.slashedLispFullDir.replace(/[\/]+/g, '/');
@@ -113,8 +124,8 @@ function generate(componentType) {
   readline.question();
 
   //DBG
-  config.info('exiting...');
-  process.exit(1);
+  //config.info('exiting...');
+  //process.exit(1);
 
   //Generate
   const destPath = config.rootSrc(tmpl.slashedLispFullDir);
@@ -131,11 +142,13 @@ gulp.task('generate:bundle', () => {
 });
 
 gulp.task('generate:component', () => {
-  return generate('component');
+  config.error('Component generation is not yet implemented');
+  //return generate('component');
 });
 
 gulp.task('generate:service', () => {
-  return generate('service');
+  config.error('Service generation is not yet implemented');
+  //return generate('service');
 });
 
 gulp.task('generate:directive', () => {

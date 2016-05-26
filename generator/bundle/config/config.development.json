@@ -1,0 +1,5 @@
+{
+    "<%= camelFullName %>": {
+        "description": "Configuration value for development env"
+    }
+}
