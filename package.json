@@ -14,8 +14,6 @@
     "angular",
     "webpack",
     "es6",
-    "kendo-ui",
-    "jquery"
   ],
   "devDependencies": {
     "angular-ui-router": "^1.0.0-alpha.5",
