@@ -13,7 +13,7 @@
   "keywords": [
     "angular",
     "webpack",
-    "es6",
+    "es6"
   ],
   "devDependencies": {
     "angular-ui-router": "^1.0.0-alpha.5",
