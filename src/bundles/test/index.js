@@ -6,6 +6,7 @@ import components from './components';
 import services from './services';
 import testComponent from './test.component';
 import config from './config';
+import homeContent from './home-content.html';
 
 export default angular.module('test', [
   config.name,
@@ -20,7 +21,6 @@ export default angular.module('test', [
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
 
-  // Having '^' in front prevents double '/' when used along with other bundles
   let url = '/test';
   if (process.env.ONLY_BUNDLE || process.env.ENV === process.env.CONST_ENV_PROD) {
     /*
@@ -29,7 +29,7 @@ export default angular.module('test', [
     */
     $locationProvider.html5Mode(false).hashPrefix('!');
     $urlRouterProvider.otherwise('/');
-    url = '/';
+    url = '';
   }
 
   /*
@@ -37,8 +37,15 @@ export default angular.module('test', [
   * See: https://github.com/angular-ui/ui-router/issues/2627
   */
   $stateProvider.state('test', {
+    abstract: true,
     component: 'test',
     url,
+  });
+
+  //default bundle state
+  $stateProvider.state('test.home', {
+    template: homeContent,
+    url: '/',
     resolve: { },
     data: {
       title: 'test',

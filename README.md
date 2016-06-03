@@ -17,7 +17,11 @@
     * [Running the App](#running-the-app)
         * [Gulp Tasks](#gulp-tasks)
         * [Testing](#testing)
-		* [Generating Components](#generating-components)		
+		* [Generating Components](#generating-components)	
+    * [Deployment](#deployment)	
+* [Hosting Application Notes](#hosting-application-hotes)
+    * [Layout page header](#layout-page-header)
+    * [Enabling CORS](#enabling-cors)
 
 # Walkthrough
 ## Build System
@@ -118,7 +122,7 @@ The file `spec.bundle.js` is the bundle file for **all** our spec files that Kar
 Be sure to define your `*.spec.js` files within their corresponding component directory. 
 You must name the spec file like so, `[name].spec.js`. If you don't want to use the `.spec.js` suffix, 
 you must change the `regex` in `spec.bundle.js` to look for whatever file(s) you want.
-`Mocha` is the testing suite and `Chai` is the assertion library. 
+[Mocha](https://mochajs.org/) is the testing suite and [Chai](http://chaijs.com/) is the assertion library. 
 If you would like to change this, see `karma.conf.js`.
 
 ### Generating Components
@@ -161,3 +165,53 @@ Example:
 gulp generate:service -n specialService -p test/myComponent
 ```
 will generate Angular Service under `src/bundles/test/components/my-component/services/...`
+
+## Deployment
+Building testing and deploying bundles into hosting application.
+See `gulp publish` task and `config/config.js` file where default deployment
+target is defined. 
+
+**... Section is under construction!**
+
+# Hosting Application Notes
+> This section describes changes in hosting application that may be required
+in order to have seemlees bundle integration. 
+While this section targets `MVC .NET` hosting application type, 
+still similar adjustments can be made to other kind of hosting applications.   
+
+**... Section is under construction!**
+
+## Layout page header
+Static assets are being referenced by relative URL in the templates. 
+In order to have those URLs to be correct after the deployment 
+into the hosting application, the HTML page where bundle is included 
+must have [base](http://www.w3schools.com/tags/tag_base.asp) tag set.
+The following is a snippet of `_Layout.cshtml` page in the hosting application
+that sets correct `base` tag.
+```cshtml
+@{
+    var request = HttpContext.Current.Request;
+    var appUrl = HttpRuntime.AppDomainAppVirtualPath;
+    if(!string.IsNullOrWhiteSpace(appUrl)) { appUrl += "/";}
+    var baseUrl = string.Format("{0}://{1}{2}", request.Url.Scheme, request.Url.Authority, appUrl);
+}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <base href="@baseUrl"/>
+        ...
+``` 
+
+## Enabling [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)
+
+It is recommended that during development all the data consumed by application 
+are supplied by `mock server` **(see help for `gulp watch` for details)**.
+However, it certain stages of development hosting application data may be desired.
+In this case hosting application should be configured to allow CORS requests coming from 
+development host. 
+
+To allow `CORS` requests the following the `Access-Control-Allow-Origin` header needs to be added
+into response.  
+** please note that `CORS` should usually be disabled in production build. ** 
+

@@ -10,10 +10,11 @@ const webpackBuilder = require('./webpack.builder.js');
 const cfg = webpackBuilder.buildConfig();
 //config.debugInspectAndExit(cfg);
 
+//NOTE: some options get overriden from gulp/test.js depending on testing mode
+
 module.exports = (karmaConfig) => {
   karmaConfig.set({
 
-    // Webpack Config at ./webpack.test.js
     webpack: cfg,
 
     // base path that will be used to resolve all patterns (e.g. files, exclude)
@@ -24,7 +25,7 @@ module.exports = (karmaConfig) => {
      *
      * available frameworks: https://npmjs.org/browse/keyword/karma-adapter
      */
-    frameworks: ['mocha', 'chai', 'jasmine', 'sinon'],
+    frameworks: ['mocha', 'chai', 'sinon'],
 
     // list of files to exclude
     exclude: [],
@@ -32,7 +33,6 @@ module.exports = (karmaConfig) => {
     plugins: [
       'karma-chai',
       'karma-sinon',
-      'karma-jasmine',
       'karma-chrome-launcher',
       'karma-phantomjs-launcher',
       'karma-mocha',
@@ -49,7 +49,6 @@ module.exports = (karmaConfig) => {
      * we are building the test environment in ./spec-bundle.js
      */
     files: [
-      //{ pattern: './config.js', watched: false },
       { pattern: './spec.bundle.js', watched: false },
     ],
 
@@ -58,16 +57,8 @@ module.exports = (karmaConfig) => {
      * available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
      */
     preprocessors: {
-      //'./config.js': ['webpack'],
       './spec.bundle.js': ['coverage', 'webpack', 'sourcemap'],
     },
-
-    //babelPreprocessor: {
-    //  options: {
-    //    sourceMap: 'inline',
-    //    presets: ['es2015'],
-    //  },
-    //},
 
     coverageReporter: {
       dir: config.root(config.data.dest.coverage),
@@ -87,7 +78,6 @@ module.exports = (karmaConfig) => {
      * possible values: 'dots', 'progress'
      * available reporters: https://npmjs.org/browse/keyword/karma-reporter
      */
-    //NOTE: is being overriden by gulp/test.js
     reporters: ['dots'],
 
     // web server port

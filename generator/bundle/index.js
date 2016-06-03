@@ -6,6 +6,7 @@ import componentsModule from './components';
 import servicesModule from './services';
 import <%= camelName %>Component from './<%= lispName %>.component';
 import configModule from './config';
+import homeContent from './home-content.html';
 
 export default angular.module('<%= dotedCamelFullName %>', [
   uiRouter,
@@ -28,7 +29,7 @@ export default angular.module('<%= dotedCamelFullName %>', [
     */
     $locationProvider.html5Mode(false).hashPrefix('!');
     $urlRouterProvider.otherwise('/');
-    url = '/';
+    url = '';
   }
 
   /*
@@ -36,8 +37,14 @@ export default angular.module('<%= dotedCamelFullName %>', [
   * See: https://github.com/angular-ui/ui-router/issues/2627
   */
   $stateProvider.state('<%= dotedCamelFullName %>', {
+    abstract: true,
     component: '<%= camelFullName %>',
     url,
+  });
+
+  $stateProvider.state('<%= dotedCamelFullName %>.home', {
+    template: homeContent,
+    url: '/',
     resolve: { },
     data: {
       title: '<%= camelName %> title',
@@ -45,15 +52,3 @@ export default angular.module('<%= dotedCamelFullName %>', [
   });
 })
 ;
-
-/*
-*  To use this bundle as page entry point, make html similar to this example:
-   ...
-   <body ng-app="<%= dotedCamelFullName %>" ng-strict-di ng-cloak>
-    <ui-view/>
-
-     <script type="text/javascript" src="/vendor.js"></script>
-     <script type="text/javascript" src="/common.js"></script>
-     <script type="text/javascript" src="/<%= lispName %>.js"></script>
-   </body>
-*/

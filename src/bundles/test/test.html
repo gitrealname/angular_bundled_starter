@@ -10,20 +10,20 @@
 
     <test-navbar>
     </test-navbar>
-  <section>
   </section>
 
-    <div ui-view>
-      <br/>
-      <button ng-click="vm.onGetData()">GetData</button>
-      <ul>
-        <li ng-repeat="val in vm.dataList">{{val}}</li>
-      </ul>
-    </div>
+  <ui-view></ui-view>
 
-  </section>
   <section class="footer">
     <p>{{ vm.name }} footer</p>
+  </section>
+
+  <section>
+    <br/>
+    <button ng-click="vm.onGetData()">GetData</button>
+    <ul>
+      <li ng-repeat="val in vm.dataList">{{val}}</li>
+    </ul>
   </section>
 </div>
 
