@@ -1,0 +1,27 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "statusbar_command.commands": [
+        {
+            "text": "$(gear)",
+            "tooltip": "workspace settings",
+            "alignment": "right",
+            "command": "workbench.action.openWorkspaceSettings"
+        },
+        {
+            "text": "$(file-text)",
+            "tooltip": "format",
+            "alignment": "right",
+            "priority": 100,
+            "include": "\\.(js|html|styl|css|less|sass|json)",
+            "command": "editor.action.format"
+        },
+        {
+            "text": "$(bug)",
+            "tooltip": "show bugs",
+            "alignment": "right",
+            "priority": 100,
+            "include": "\\.(js|html|styl|css|less|sass|json)",
+            "command": "workbench.action.showErrorsWarnings"
+        }
+    ]
+}
