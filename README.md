@@ -10,6 +10,7 @@
     * [Build System](#build-system)
     * [File Structure](#file-structure)
     * [Testing Setup](#testing-setup)
+    * [Style Guide](#style-guide)
 * [Getting Started](#getting-started)
     * [Dependencies](#dependencies)
     * [Installing](#installing)
@@ -76,6 +77,11 @@ All tests are also written in ES6. We use Webpack to take care of the logistics 
 * Mocha
 * Chai
 To run tests, type `gulp test` or `gulp test:runonce` in the terminal. Read more about testing [below](#testing).
+
+## Style Guide
+Project organization and naming conventions are similar to those found in the following guides:
+* [Angular 2 Style Guide](https://angular.io/docs/ts/latest/guide/style-guide.html)
+* [Angular 1 Style Guide by John Papa](https://github.com/johnpapa/angular-styleguide)
 
 # Getting Started
 ## Dependencies
