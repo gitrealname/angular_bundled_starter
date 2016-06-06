@@ -331,12 +331,12 @@ this.dataList = [];
 ### Development mode request interceptor (data mocks)
 Default pacakge is destributed with development helper services. One of the services
 is called `requestMockServerProxy` interceptor that allows serving of mock data.
-Please note that data you age getting with `Get Data` button and by `Home/GetTestModel`
+Please note that data you are getting with `Get Data` button and by `Home/GetTestModel`
 url comes from `src\mock.server\Home\GetTestModel.json`.
 >** NOTE: The Mock Server folder and file names are case sensetive! ** 
 
 
-#Debuggin tips
+# Debugging tips
 > For best debugging experience we recommend to use `Google Chrome` as your 
 development browser. 
 
@@ -348,5 +348,4 @@ be automatically propagated into respected source files.
  To do unit test development cycle. 
  Start `gulp test` and start editing `.spec.js` files. 
  Do it from `VS Code` for better experience, as it will help with error navigation. 
- 
- 
+  
