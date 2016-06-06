@@ -22,6 +22,7 @@
 * [Hosting Application Notes](#hosting-application-hotes)
     * [Layout page header](#layout-page-header)
     * [Enabling CORS](#enabling-cors)
+* [First bundle Step-by-Step tutorial](#first-bundle-step-by-step-tutorial)
 
 # Walkthrough
 ## Build System
@@ -211,7 +212,141 @@ However, it certain stages of development hosting application data may be desire
 In this case hosting application should be configured to allow CORS requests coming from 
 development host. 
 
-To allow `CORS` requests the following the `Access-Control-Allow-Origin` header needs to be added
+To allow `CORS` requests `Access-Control-Allow-Origin` header needs to be added
 into response.  
 ** please note that `CORS` should usually be disabled in production build. ** 
 
+# First bundle Step-by-Step tutorial
+>* To follow this tutorial you will need to install [dependencies](#Dependencies)
+>including `Visual Studio Code` with recommended plugins.
+>* Tutorial will refer to `d:\ngStarter` as a directory where package content
+>was extracted to. If you have package content in different folder, please use it
+>instead of `d:\ngStarter`.
+
+## Initial steps
+* Start `VS Code` and ** File/Open Folder ** `d:\ngStarter`.
+* Start terminal app `Command prompt` or `Powershell` and `cd d:\ngStarter`.
+
+>From now on all file names will be provided relative to the package root!
+
+## Generating minimalistic bundle
+In terminal window type `gulp generate:bundle -n test`. 
+This will create bundle's initial file structure with minimal functionality
+under `src\bundles\test`.
+
+## Starting development server
+In terminal window type `gulp watch`. Then, point a browser to [http://localhost:3000](http://localhost:3000).
+You will notice that gulp task doesn't finish. This is done on purpose. 
+While `watch` task is running all code changes will be automatically picked up and 
+propagated into running application. You may think of it as advanced `Edit and Continue` 
+debug mode supported by `Microsoft Visual Studio` 
+
+>Alternatively, any gulp task can be executed via `VS Code`. 
+>To do that press `Ctrl+P` and type in `>task` then pick `Tasks: Run Task`. 
+>(it may take a little while first time before available tasks will appear).
+>Benefit of running gulp task from within `VS Code` is that it will catch all 
+>compilation errors and warnings and offer simple way to navigate to the problematic
+>area of the code. 
+
+## Play around
+>Keep `watch` task running.
+
+Make small changes in any of the code files including .html, .js and .styl.
+Observe automatic change propagation upon file/safe (`Ctrl+S`).
+
+## Extending functionality
+>Keep `watch` running. 
+
+>If `gulp watch` was started in terminal window, then open new terminal window   
+
+In terminal window enter `gulp generate:component -n page1 -p test`. 
+This command will generate simplistic Angular component and place it
+under `src\bundles\test\components\page1\..`. 
+To register new component with an application copy and paste the following
+two snippets. Paste first snippet at the top of the `src\bundles\test\components\index.js`
+after other imports. And second snippet in the module dependencies section of the file.
+ 
+
+```js
+import page1 from './page1';
+```
+```js
+page1.name
+```
+
+### Adding routing
+In the `header` section of the `src\bundles\test\test.html` copy and paste
+the following snippet:
+```html
+<a ui-sref="test.home">Home</a>
+<a ui-sref="test.page1">Page 1</a>
+```
+
+>Keep observing the browser window, new component should now be available and accessable.
+
+## Getting data
+>Keep `watch` running.
+
+### Creating service
+In terminal window type `gulp generate:service -n testDataService -p test`
+Register new service with application in `src\bundles\test\services\index.js`
+```js
+import TestDataService from './test-data.service';
+```
+And the following snippet at the very bottom of the file, right before final ';' (semicolon) 
+```js
+.service('testDataService', TestDataService)
+```
+Edit `src\bundles\test\services\test-data.service.js`, replace `$http.get` line
+with
+```js
+...
+return this.$http.get('Home/GetTestModel').then((response) => { 
+...
+```
+
+### Wire up service call
+Paste the following snippet into the `footer` section of the `src\bundles\test\test.html`
+
+```html
+<button ng-click="vm.onGetData()">GetData</button>
+<ul>
+    <li ng-repeat="val in vm.dataList">{{val}}</li>
+</ul>
+```
+And next one into `src\bundles\test\test.component.js` 
+within  `TestController` class.
+```js
+onGetData() {
+    this.testDataService.getModel().then((result) => {
+        this.dataList = result.dataList || ['ERROR'];
+    });
+}
+``` 
+Also declare `dataList` variable in the `TestController` constructor:
+```js
+this.dataList = [];
+```
+
+### Development mode request interceptor (data mocks)
+Default pacakge is destributed with development helper services. One of the services
+is called `requestMockServerProxy` interceptor that allows serving of mock data.
+Please note that data you age getting with `Get Data` button and by `Home/GetTestModel`
+url comes from `src\mock.server\Home\GetTestModel.json`.
+>** NOTE: The Mock Server folder and file names are case sensetive! ** 
+
+
+#Debuggin tips
+> For best debugging experience we recommend to use `Google Chrome` as your 
+development browser. 
+
+Drag and Drop `d:\ngStarter` folder from file explorer into `Chrome` sources tab, 
+explorer panel. Now, you can even edit files within the browser and changes will 
+be automatically propagated into respected source files.
+ 
+ # Further study
+ To do unit test development cycle. 
+ Start `gulp test` and start editing `.spec.js` files. 
+ Do it from `VS Code` for better experience, as it will help with error navigation. 
+ 
+ 
