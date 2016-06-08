@@ -15,6 +15,22 @@
 const angular = require('angular');
 const mocks = require('angular-mocks');
 
+/**
+ * Configure chai (assertion framework)
+ *
+ * see: https://github.com/chaijs/chai/blob/master/ReleaseNotes.md#quick-migration
+ */
+const chai = require('chai');
+const assertionError = require('assertion-error');
+
+/**
+ * NOTE: assertionError plugin is still doesn't capture stack trace when run under PhantomJS
+ */
+
+chai.use(assertionError);
+chai.config.includeStack = true;
+
+
 // We use the context method on `require` which Webpack created
 // in order to signify which files we actually want to require or import.
 // Below, `context` will be a/an function/object with file names as keys.

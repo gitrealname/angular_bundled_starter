@@ -40,11 +40,6 @@ function buildMetadata() {
 module.exports.buildMetadata = buildMetadata;
 
 function buildOutput() {
-  if (config.isEnvTest()) {
-    return {
-    };
-  }
-
   let path = config.root(config.data.dest.prod);
   let publicPath = '';
   let suffix = '.';

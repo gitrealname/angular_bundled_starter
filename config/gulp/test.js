@@ -4,38 +4,44 @@
 * See: https://www.npmjs.com/package/gulp-help
 */
 const gulp = require('gulp-help')(require('gulp'));
+import gutil from 'gulp-util';
 
 import config from '../config';
 const KarmaServer = require('karma').Server;
 
-function karmaExited(exitCode) {
-  console.log('Karma has exited with ' + exitCode);
-  process.exit(exitCode);
-}
-
-gulp.task('test:runonce', () => {
+gulp.task('test:runonce', (cb) => {
   config.setEnvTest();
   const srv = new KarmaServer({
     configFile: config.root('config', 'karma.conf.js'),
     singleRun: true,
     autoWatch: false,
     reporters: ['mocha', 'coverage'],
-  }, karmaExited);
+  }, (err) => {
+    if (err) {
+      err = new gutil.PluginError('karma', err);
+    }
+    cb(err);
+  });
   srv.start();
 });
 
-gulp.task('test:watch', () => {
+gulp.task('test:watch', (cb) => {
   config.setEnvTestWatch();
   const srv = new KarmaServer({
     configFile: config.root('config', 'karma.conf.js'),
     singleRun: false,
     autoWatch: true,
     reporters: ['dots'], //['dots', 'coverage']
-  }, karmaExited);
+  }, (err) => {
+    if (err) {
+      err = new gutil.PluginError('karma', err);
+    }
+    cb(err);
+  });
   srv.start();
 });
 
-gulp.task('test:debug', () => {
+gulp.task('test:debug', (cb) => {
   config.setEnvTestWatch();
   const srv = new KarmaServer({
     configFile: config.root('config', 'karma.conf.js'),
@@ -43,7 +49,12 @@ gulp.task('test:debug', () => {
     autoWatch: true,
     reporters: ['dots'],
     browsers: ['Chrome'],
-  }, karmaExited);
+  }, (err) => {
+    if (err) {
+      err = new gutil.PluginError('karma', err);
+    }
+    cb(err);
+  });
   srv.start();
 });
 

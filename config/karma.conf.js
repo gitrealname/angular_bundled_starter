@@ -43,6 +43,21 @@ module.exports = (karmaConfig) => {
       'karma-babel-preprocessor',
     ],
 
+    /**
+     * Mocha reporter options
+     *
+     * see: https://www.npmjs.com/package/karma-mocha-reporter
+     */
+    mochaReporter: {
+      output: 'full',
+      colors: {
+        success: 'blue',
+        info: 'bgGreen',
+        warning: 'cyan',
+        error: 'bgRed',
+      },
+    },
+
     /*
      * list of files / patterns to load in the browser
      *
