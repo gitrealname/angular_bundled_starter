@@ -16,7 +16,13 @@ export default angular.module('test', [
   services.name,
 ])
 
-.component('test', testComponent)
+.component('xxTest', testComponent)
+
+.run(($rootScope, $state, $stateParams) => {
+  'ngInject';
+  $rootScope.$state = $state;
+  $rootScope.$stateParams = $stateParams;
+})
 
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
@@ -38,8 +44,7 @@ export default angular.module('test', [
   */
   $stateProvider.state('test', {
     abstract: true,
-    selector: 'xx-test',
-    component: 'test',
+    component: 'xxTest',
     url,
   });
 

@@ -6,11 +6,13 @@ export default angular.module('test.about', [
   uiRouter,
 ])
 
+.component('xxTestAbout', aboutComponent)
+
 .config(($stateProvider) => {
   'ngInject';
   const url = '/about';
   $stateProvider.state('test.about', {
-    component: 'testAbout',
+    component: 'xxTestAbout',
     url,
     resolve: { },
     data: {
@@ -18,5 +20,4 @@ export default angular.module('test.about', [
     },
   });
 })
-
-.component('testAbout', aboutComponent);
+;

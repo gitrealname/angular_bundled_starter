@@ -417,6 +417,9 @@ srcDirs.filter((d) => {
 data.entryMap = entryMap;
 
 env.APP_BUNDLES = Object.keys(entryMap).filter((v) => v !== common);
+if (env.APP_BUNDLES.length === 1) {
+  env.ONLY_BUNDLE = true;
+}
 env.APP_BUNDLE_MODULES = env.APP_BUNDLES.map((v) => {
   return nameToChunks(v, camelCase, false).join('');
 });

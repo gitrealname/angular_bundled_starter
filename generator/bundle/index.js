@@ -16,7 +16,13 @@ export default angular.module('<%= dotedCamelFullName %>', [
   servicesModule.name,
 ])
 
-.component('<%= camelFullName %>', <%= camelName %>Component)
+.component('xx<%= camelCapFullName %>', <%= camelName %>Component)
+
+.run(($rootScope, $state, $stateParams) => {
+  'ngInject';
+  $rootScope.$state = $state;
+  $rootScope.$stateParams = $stateParams;
+})
 
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
@@ -36,18 +42,18 @@ export default angular.module('<%= dotedCamelFullName %>', [
   * for details on ui-router component router
   * See: https://github.com/angular-ui/ui-router/issues/2627
   */
-  $stateProvider.state('<%= dotedCamelFullName %>', {
+  $stateProvider.state('<%= dotedLispFullName %>', {
     abstract: true,
-    component: '<%= camelFullName %>',
+    component: 'xx<%= camelCapFullName %>',
     url,
   });
 
-  $stateProvider.state('<%= dotedCamelFullName %>.home', {
+  $stateProvider.state('<%= dotedLispFullName %>.home', {
     template: homeContent,
     url: '/',
     resolve: { },
     data: {
-      title: '<%= camelName %> title',
+      title: '<%= camelCapName %> title',
     },
   });
 })

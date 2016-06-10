@@ -7,7 +7,7 @@ export default angular.module('<%= dotedCamelFullName %>', [
   uiRouter,
 ])
 
-.component('<%= camelFullName %>', <%= camelName %>Component)
+.component('xx<%= camelCapFullName %>', <%= camelName %>Component)
 
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
@@ -15,8 +15,8 @@ export default angular.module('<%= dotedCamelFullName %>', [
   * for details on ui-router component router
   * See: https://github.com/angular-ui/ui-router/issues/2627
   */
-  $stateProvider.state('<%= dotedCamelFullName %>', {
-    component: '<%= camelFullName %>',
+  $stateProvider.state('<%= dotedLispFullName %>', {
+    component: 'xx<%= camelCapFullName %>',
     url: '/<%= lispName %>',
     resolve: { },
     data: {
