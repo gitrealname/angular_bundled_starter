@@ -346,8 +346,9 @@ url comes from `src\mock.server\Home\GetTestModel.json`.
 > For best debugging experience we recommend to use `Google Chrome` as your 
 development browser. 
 
-Drag and Drop `d:\ngStarter` folder from file explorer into `Chrome` sources tab, 
-explorer panel. Now, you can even edit files within the browser and changes will 
+Drag and Drop `d:\ngStarter\src` folder from file explorer into `Chrome` sources tab (explorer panel), 
+right click within file source and 'Map to file system resource...'   
+Now, you can even edit files within the browser and changes will 
 be automatically propagated into respected source files.
  
  # Further study

@@ -41,7 +41,7 @@ module.exports.buildMetadata = buildMetadata;
 
 function buildOutput() {
   let path = config.root(config.data.dest.prod);
-  let publicPath = '';
+  let publicPath = '/';
   let suffix = '.';
   if (config.isEnvDev() || config.isEnvTest()) {
     path = config.rootSrc();
@@ -99,41 +99,48 @@ function buildOutput() {
   // build:sourcemap:fix bulp task!!!!!
   ret.devtoolModuleFilenameTemplate = (info) => {
     const rp = info.resourcePath;
-    //keep node modules as is move everything else under '~/'
-    //we expect that js and ts resources will be processed again
-    //and final apperance of resource  is going to be actual source file.
-    if (rp.match(/^\.\/~/)) {
-      return info.resourcePath;
-    }
-    //we care about styles naming only for build purposes for easy of correction.
-    if (config.isEnvProd()) {
-      //move styles into _styles_ directory with custom name
-      if (rp.match(/(styl|less|sass|css)$/)) {
-        return '_css_/' + rp; // + '?hash=' + info.hash;
+    let nrp = rp;
+    if (rp.match(/^\.\.\/~/)) {
+      //move node_modules under ./.node_modules pseudo directory
+      nrp = './.node_modules' + rp.slice(4);
+    } else if (rp.match(/(html|json)$/)) {
+      //keep html and json files without any change
+      nrp = info.resourcePath;
+    } else if (rp.match(/(styl|less|sass|css)$/) && config.isEnvProd()) {
+      //resource Path for styles looks extrimly "strange", example:
+      // 1) webpack:///bundles/test/src/bundles/test/test.styl
+      // 2) webpack:///bundles/test/test.styl
+      // and in rality 1) is an actual source, while 2) is already translated by loaders.
+      //Therefore: correct 1) and move 2) under '.' directory
+      //styles being kept in separate directory for easy of correction during build (see build.js)
+      nrp = rp.replace(/^webpack:\/{3}/, '/');
+      const chunks = nrp.split(config.data.dir.src);
+      if (chunks.length === 2 && chunks[1].indexOf(chunks[0]) === 0) {
+        nrp = '.' + chunks[1];
+      } else {
+        nrp = '~/.' + nrp + '?' + info.hash + (info.moduleId ? '-' + info.moduleId : '');
       }
+    } else {
+      nrp = '~/' + info.resourcePath + '?' + info.hash + (info.moduleId ? '-' + info.moduleId : '');
     }
-    return '~/' + info.resourcePath + '?' + info.hash + (info.moduleId ? '-' + info.moduleId : '');
+
+    //console.log(nrp);
+    return nrp;
   };
 
   ret.devtoolFallbackModuleFilenameTemplate = (info) => {
     const rp = info.resourcePath;
-    //restore original name only for source files (js|ts) and node_modules (./~)
-    //keep everything else in '~' folder
-    if (rp.match(/\.(js|ts)/) || rp.match(/^\.\/~/)) {
-      return info.resourcePath;
-    }
-    //styles being kept in separate directory, normolize repeated name,
-    //assuming that it is original source file
-    if (rp.match(/(styl|less|sass|css)$/)) {
-      return '_css_/' + rp;
+    let nrp = rp;
+    if (rp.match(/\.(js|ts)/)) {
+    //restore original name only for source files (js|ts)
+    //keep everything else in '~/' folder
+      nrp = info.resourcePath;
+    } else {
+      nrp = '~/' + info.resourcePath + '?' + info.hash + (info.moduleId ? '-' + info.moduleId : '');
     }
 
-    //let newRP
-    //if (newRP = rp.replace(/webpack:\/\/\/(.*?(styl|less|sass|css)/, './$1')) {
-      //return newRP;
-    //}
-    //config.debugInspectAndExit(info);
-    return '~/' + info.resourcePath + '?' + info.hash + (info.moduleId ? '-' + info.moduleId : '');
+    //console.log('--> ' + nrp);
+    return nrp;
   };
 
   return ret;
@@ -322,7 +329,7 @@ function buildExtractTextPlugin() {
   if (config.isEnvProd() && config.isBuildRelease()) {
     suffix = '.min.';
   }
-  if (config.isEnvDev()) {
+  if (config.isEnvDev() || config.isEnvTest()) {
     disable = true;
   }
 
@@ -627,6 +634,8 @@ module.exports.buildDevTool = buildDevTool;
 function buildConfig() {
   return {
     context: config.rootSrc(),
+
+    cache: (config.isEnvProd() ? false : {}),
 
     /**
      * Switch loaders to debug mode.

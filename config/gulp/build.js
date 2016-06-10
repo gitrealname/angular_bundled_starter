@@ -72,35 +72,11 @@ gulp.task('build:compile:release', (cb) => {
   webpackRun(2, cb);
 });
 
-const sourceRootRx = new RegExp('("sourceRoot"\\s*:\\s*")([^"]*")', 'i');
-
-//IMPORTANT: format of the source map dictated by logic in the webpackBuilder
-// see buildOutput() in webpack.builder.js
-//file patterns and translations (==>)
-//  ~/[a-z]... - actual bundle ==> [a-z]...
-//  ~/./.... - keep invisible ==> (do nothing)...
-//  ~/../~/.... - node modules ==> ../node_modules/.......
-//  _css_/webpack:///<path>/src/<same-path>... - actual original files ==> ./<same-path>...
-//  _css_/webpack:///<path>.... - styles translated ==> ~/./<path>...
-// webpack/bootstrap... ==> move to ~
 gulp.task('build:sourcemap:fix', 'fixes source maps', () => {
+  const sourceRootRx = new RegExp('("sourceRoot"\\s*:\\s*")([^"]*")', 'i');
   const relativeSrcPath = config.pathDiffToRelativePath(config.rootSrc(), 'config.data.dest.prod');
-  const cssRepeatRx = new RegExp('("_css_\\/webpack:\\/\\/\\/)([^"]+)\\/' + config.data.dir.src + '\\/\\2([^"]+")', 'gi');
 
   const task = gulp.src([config.root(config.data.dest.prod) + '/**/*.map'])
-
-  //process ~/[a-z]... - actual bundle ==> [a-z]...
-  .pipe(replace(/"~\/([^\.][^"]+?")/gi, '"$1'))
-  //~/../~/.... - node modules ==> ../node_modules/
-  .pipe(replace(/~\/\.\.\/~/gi, '../' + config.data.dir.node))
-  //temporary rename good _css_ to make it different from bad css entries
-  .pipe(replace(cssRepeatRx, '"_css_./$2$3'))
-  //move bad css into ~/
-  .pipe(replace(/_css_\/webpack:\/\//gi, '~/.'))
-  //finalize good css name
-  .pipe(replace(/"_css_/gi, '"'))
-  // webpack/bootstrap... ==> move to ~
-  .pipe(replace(/"(webpack\/bootstrap)/gi, '"~/./$1'))
 
   //set srouceRoot
   .pipe(replace(sourceRootRx, '$1' + relativeSrcPath + '"'))
@@ -112,8 +88,12 @@ gulp.task('build:sourcemap:fix', 'fixes source maps', () => {
   return task;
 });
 
+// gulp.task('build:release', 'Build deployment package.', (cb) => {
+//   runSequence('build:clean', 'test:runonce', 'build:compile:release', 'build:sourcemap:fix', cb);
+// });
+
 gulp.task('build:release', 'Build deployment package.', (cb) => {
-  runSequence('build:clean', 'test:runonce', 'build:compile:release', 'build:sourcemap:fix', cb);
+  runSequence('build:clean', 'build:compile:release', 'build:sourcemap:fix', cb);
 });
 
 gulp.task('build:debug', 'Build debug(non-minified) deployment package.', (cb) => {

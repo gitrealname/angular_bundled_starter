@@ -38,6 +38,7 @@ export default angular.module('test', [
   */
   $stateProvider.state('test', {
     abstract: true,
+    selector: 'xx-test',
     component: 'test',
     url,
   });
