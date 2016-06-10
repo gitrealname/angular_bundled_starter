@@ -86,12 +86,12 @@ Project organization and naming conventions are similar to those found in the fo
 # Getting Started
 ## Dependencies
 Tools needed to run this app:
-* [node](https://nodejs.org/dist/v4.4.5/node-v4.4.5-x64.msi)
+* [node](https://nodejs.org/dist/v6.2.1/node-v6.2.1-x64.msi)
 * [Visual Studio Code](https://code.visualstudio.com/) (Optional. But strongly recommended editor). 
 
 ## Installing
 Once you dependencies installed:
-* `npm install -g gulp` install global cli dependencies
+* `npm install -g gulp typings` install global cli dependencies
 * `npm install` to install project specific dependencies
 
 ## Recommended VS Code plugins

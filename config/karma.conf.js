@@ -58,6 +58,26 @@ module.exports = (karmaConfig) => {
       },
     },
 
+    /**
+     * PhantomJs Launcher options
+     *
+     * see: https://www.npmjs.com/package/karma-phantomjs-launcher
+     */
+    phantomjsLauncher: {
+      // Have phantomjs exit if a ResourceError is encountered (useful if karma exits without killing phantom)
+      exitOnResourceError: true,
+      //flags: ['--load-images=true', 'remote-debugger-port=9000', '--remote-debugger-autorun=no'],
+    },
+
+    /**
+     * PhantomJs Launcher options
+     *
+     * see: https://www.npmjs.com/package/karma-chrome-launcher
+     */
+    chromeLaunchers: {
+      //flags: ['--remote-debugging-port=9000'],
+    },
+
     /*
      * list of files / patterns to load in the browser
      *

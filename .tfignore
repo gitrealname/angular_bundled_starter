@@ -1,5 +1,6 @@
 # Ignore all files in the sub-folder
 \node_modules
+\typings
 \.git
 \dest*
 \test*
