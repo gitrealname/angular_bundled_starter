@@ -88,12 +88,8 @@ gulp.task('build:sourcemap:fix', 'fixes source maps', () => {
   return task;
 });
 
-// gulp.task('build:release', 'Build deployment package.', (cb) => {
-//   runSequence('build:clean', 'test:runonce', 'build:compile:release', 'build:sourcemap:fix', cb);
-// });
-
 gulp.task('build:release', 'Build deployment package.', (cb) => {
-  runSequence('build:clean', 'build:compile:release', 'build:sourcemap:fix', cb);
+  runSequence('build:clean', 'test:runonce', 'build:compile:release', 'build:sourcemap:fix', cb);
 });
 
 gulp.task('build:debug', 'Build debug(non-minified) deployment package.', (cb) => {
