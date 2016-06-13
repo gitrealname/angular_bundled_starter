@@ -8,7 +8,7 @@ import <%= camelName %>Component from './<%= lispName %>.component';
 import configModule from './config';
 import homeContent from './home-content.html';
 
-export default angular.module('<%= dotedCamelFullName %>', [
+export default angular.module('<%= dotedAppPrefix %><%= dotedCamelFullName %>', [
   uiRouter,
   configModule.name,
   commonModule.name,
@@ -16,7 +16,7 @@ export default angular.module('<%= dotedCamelFullName %>', [
   servicesModule.name,
 ])
 
-.component('xx<%= camelCapFullName %>', <%= camelName %>Component)
+.component('<%= appPrefix %><%= camelCapFullName %>', <%= camelName %>Component)
 
 .run(($rootScope, $state, $stateParams) => {
   'ngInject';
@@ -44,7 +44,7 @@ export default angular.module('<%= dotedCamelFullName %>', [
   */
   $stateProvider.state('<%= dotedLispFullName %>', {
     abstract: true,
-    component: 'xx<%= camelCapFullName %>',
+    component: '<%= appPrefix %><%= camelCapFullName %>',
     url,
   });
 

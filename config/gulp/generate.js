@@ -16,10 +16,13 @@ function createGeneratorTemplateParams(componentType) {
   const data = config.data;
   componentType = componentType.toLowerCase();
   const tmpl = {
+    appPrefix: config.data.appPrefix,
+    dotedAppPrefix: config.data.dotedAppPrefix, //with trailing '.' or empty
+    lispAppPrefix: config.data.lispAppPrefix, //with trailing '-' or empty
     camelName: 'myComponentABCSpecial', //suffix is dropped
     camelCapName: 'MyComponentABCSpecial', //suffix is dropped
     lispName: 'my-component-abc-special', //suffix is dropped
-    suffix: '<depends on componentType param', //either of Component, Service, Directive, ....
+    suffix: '<depends on componentType param>', //either of Component, Service, Directive, Model....
 
     dotedCamelCapFullName: 'Parent.AnotherParent.MyComponentABCSpecial', // no suffix
     dotedLispFullName: 'parent.another-parent.my-component-abc-special',
@@ -59,7 +62,7 @@ function createGeneratorTemplateParams(componentType) {
 
   //removes intermediate 'components' and explicit ending if spcified
   const parentNameChunks = parentChunks.filter((v) => {
-    return !v.match('/(components|bundles|directives|services|controllers)/');
+    return !v.match('/(components|bundles|directives|services|controllers|models)/');
   });
   tmpl.dotedCamelCapFullName = parentNameChunks.map((v) => {
     return config.nameToChunks(v, config.camelCapCase, true).join('');
@@ -67,7 +70,7 @@ function createGeneratorTemplateParams(componentType) {
 
   tmpl.dotedLispFullName = parentNameChunks.map((v) => {
     return config.nameToChunks(v, config.lowerCase, true).join('-');
-  }).concat(tmpl.camelCapName).join('.');
+  }).concat(tmpl.lispName).join('.');
 
   tmpl.dotedCamelFullName = parentNameChunks.map((v) => {
     return config.nameToChunks(v, config.camelCase, true).join('');

@@ -37,6 +37,9 @@ const common = 'common';
 const assets = 'AppContent';
 const mockServer = 'mock.server';
 const config = 'config';
+const appPrefix = 'xx';
+const dotedAppPrefix = appPrefix.length ? appPrefix + '.' : ''; //used for module, directives and components names and prefixes; expected to have trailing '.' unless empty!
+const lispAppPrefix = appPrefix.length ? appPrefix + '-' : ''; //used for class names; expected to have trailing '-' unless empty!
 
 const data = {
   //relative to root
@@ -62,7 +65,7 @@ const data = {
     coverage: 'test.coverage',
   },
   publish: {
-    root: '../ngWebpackMvc4/ngWebpackMvc4', //relative to root or absolute path
+    root: '../Ltss.Web/', //relative to root or absolute path
     //relative to publish root
     content: assets,
     styles: assets,
@@ -92,6 +95,9 @@ const data = {
   },
   currentDest: '< one of the data.dest, determined based on env>',
   nameList: '<list of all --name param values without processing>',
+  appPrefix,
+  dotedAppPrefix,
+  lispAppPrefix,
 };
 exports.data = data;
 
@@ -109,6 +115,9 @@ const env = {
   CONST_ENV_DEV: data.env.dev,
   BACKEND_SERVER_URL: '', //url that all http requests will be sent to. keep it empty to serve data from mock.server
   MOCK_SERVER_DIR: data.dir.mockServer,
+  DOTED_APP_PREFIX: dotedAppPrefix,
+  CAMEL_APP_PREFIX: appPrefix,
+  LISP_APP_PREFIX: lispAppPrefix,
 };
 exports.env = env;
 
@@ -387,7 +396,7 @@ srcDirs.filter((d) => {
     if (!listedBundleNames.length || listedBundleNames.indexOf(lst[1]) >= 0) {
       indexFileSuffix = d + '/index';
       fileSuffix = d + '/' + lst[1];
-      key = nameToChunks(lst[1], camelCase).join('');
+      key = nameToChunks(lst[1], lowerCase).join('-');
       ret = true;
     }
   }

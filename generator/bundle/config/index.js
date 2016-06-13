@@ -2,7 +2,7 @@ import angular from 'angular';
 import masterConfig from './config.json';
 import devDiffConfig from './config.development.json';
 
-const <%= camelName %>Config = angular.module('<%= dotedCamelFullName %>.config', ['common.services'])
+const <%= camelName %>Config = angular.module('<%= dotedAppPrefix %><%= dotedCamelFullName %>.config', ['<%= dotedAppPrefix %>common.services'])
 
 .config(['configServiceProvider', (configProvider) => {
   configProvider.mergeConfig(masterConfig);

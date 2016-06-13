@@ -3,11 +3,11 @@ import angular from 'angular';
 import uiRouter from 'angular-ui-router';
 import <%= camelName %>Component from './<%= lispName %>.component';
 
-export default angular.module('<%= dotedCamelFullName %>', [
+export default angular.module('<%= dotedAppPrefix %><%= dotedCamelFullName %>', [
   uiRouter,
 ])
 
-.component('xx<%= camelCapFullName %>', <%= camelName %>Component)
+.component('<%= appPrefix %><%= camelCapFullName %>', <%= camelName %>Component)
 
 .config(($locationProvider, $urlRouterProvider, $stateProvider) => {
   'ngInject';
@@ -16,7 +16,7 @@ export default angular.module('<%= dotedCamelFullName %>', [
   * See: https://github.com/angular-ui/ui-router/issues/2627
   */
   $stateProvider.state('<%= dotedLispFullName %>', {
-    component: 'xx<%= camelCapFullName %>',
+    component: '<%= appPrefix %><%= camelCapFullName %>',
     url: '/<%= lispName %>',
     resolve: { },
     data: {
