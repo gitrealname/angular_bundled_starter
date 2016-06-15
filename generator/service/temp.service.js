@@ -1,4 +1,4 @@
-
+/// <reference path="<%=  rootRelativePath %>typings/index.d.ts" />
 export default class <%= camelCapName %>Service {
   constructor($http) {
     'ngInject';

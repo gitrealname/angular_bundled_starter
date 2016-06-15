@@ -1,3 +1,4 @@
+/// <reference path="<%=  rootRelativePath %>typings/index.d.ts" />
 import './<%= lispName %>.styl';
 import angular from 'angular';
 import uiRouter from 'angular-ui-router';
@@ -8,7 +9,7 @@ import <%= camelName %>Component from './<%= lispName %>.component';
 import configModule from './config';
 import homeContent from './home-content.html';
 
-export default angular.module('<%= dotedAppPrefix %><%= dotedCamelFullName %>', [
+export default angular.module('<%= dotedAppPrefix %><%= dotedLispFullName %>', [
   uiRouter,
   configModule.name,
   commonModule.name,

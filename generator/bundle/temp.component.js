@@ -1,3 +1,4 @@
+/// <reference path="<%=  rootRelativePath %>typings/index.d.ts" />
 import './<%= lispName %>.styl';
 import template from './<%= lispName %>.html';
 

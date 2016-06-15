@@ -65,7 +65,7 @@ const data = {
     coverage: 'test.coverage',
   },
   publish: {
-    root: '../Ltss.Web/', //relative to root or absolute path
+    root: '../mvc.project.root/', //relative to root or absolute path
     //relative to publish root
     content: assets,
     styles: assets,
@@ -316,7 +316,7 @@ function nameToChunks(name, caseType, dropSuffix) {
 
   if (dropSuffix) {
     let last = ret.pop();
-    last = last.replace(/(service|directive|component|interceptor|controller|filter|module|bundle)$/i, '');
+    last = last.replace(/(service|directive|component|interceptor|controller|filter|module|model|bundle)$/i, '');
     if (last.length) {
       ret.push(last);
     }
@@ -454,6 +454,7 @@ function pathDiffToRelativePath(srcPath, destPath) {
   let res = '../'.repeat(destChunks.length - commonChunks.length);
   const srcDiff = srcChunks.splice(commonChunks.length);
   res = res + srcDiff.join('/') + '/';
+  res = res.replace('//', '/');
 
   //debugInspectAndExit(srcChunks, destChunks, res, srcDiff);
 
@@ -479,5 +480,3 @@ exports.isBuildRelease = () => { return env.BUILD === data.build.release; };
 exports.isBuildDebug = () => { return env.BUILD === data.build.debug; };
 exports.isBuildTest = () => { return env.BUILD === data.build.test; };
 exports.isWatched = () => { return env.WATCH === true; };
-
-

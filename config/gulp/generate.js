@@ -25,7 +25,9 @@ function createGeneratorTemplateParams(componentType) {
     suffix: '<depends on componentType param>', //either of Component, Service, Directive, Model....
 
     dotedCamelCapFullName: 'Parent.AnotherParent.MyComponentABCSpecial', // no suffix
+    dotedCamelCapParentFullName: 'Parent.AnotherParent',
     dotedLispFullName: 'parent.another-parent.my-component-abc-special',
+    dotedLispParentFullName: 'parent.another-parent',
     dotedCamelFullName: 'parent.anotherParent.myComponentAbcSpecial',
     lispFullName: 'parent-another-parent-my-component-abc-special', //no suffix
     camelFullName: 'parentAnotherParentMyComponentAbcSpecial',
@@ -37,6 +39,8 @@ function createGeneratorTemplateParams(componentType) {
 
     lispBundleName: '',
     bundleRootRelativePath: './',
+    srcRootRelativePath: '../../',
+    rootRelativePath: '../../../',
   };
 
   let parent = config.getProcessingFlag('parent') || '';
@@ -68,9 +72,17 @@ function createGeneratorTemplateParams(componentType) {
     return config.nameToChunks(v, config.camelCapCase, true).join('');
   }).concat(tmpl.camelCapName).join('.');
 
+  let arr = tmpl.dotedCamelCapFullName.split('.');
+  arr.pop();
+  tmpl.dotedCamelCapParentFullName = arr.join('.');
+
   tmpl.dotedLispFullName = parentNameChunks.map((v) => {
     return config.nameToChunks(v, config.lowerCase, true).join('-');
   }).concat(tmpl.lispName).join('.');
+
+  arr = tmpl.dotedLispFullName.split('.');
+  arr.pop();
+  tmpl.dotedLispParentFullName = arr.join('.');
 
   tmpl.dotedCamelFullName = parentNameChunks.map((v) => {
     return config.nameToChunks(v, config.camelCase, true).join('');
@@ -116,11 +128,24 @@ function createGeneratorTemplateParams(componentType) {
   }
   tmpl.slashedLispFullDir = tmpl.slashedLispFullDir.replace(/[\/]+/g, '/');
 
-  //calculate parent relative name
+  //calculate parent bundle relative name
   const len = tmpl.slashedLispFullDir.split('/').length - (isDestinationCommon ? 1 : 2);
   if (componentType !== 'bundle') {
     tmpl.bundleRootRelativePath = '../'.repeat(len);
   }
+
+  //calculate src relative path
+  if (tmpl.slashedLispParentDir.indexOf(config.data.dir.common) === 0) {
+    tmpl.srcRootRelativePath = '../' + tmpl.bundleRootRelativePath;
+  } else {
+    tmpl.srcRootRelativePath = '../../' + tmpl.bundleRootRelativePath;
+    tmpl.srcRootRelativePath = tmpl.srcRootRelativePath.replace('/./', '/'); //in case of bundle generation
+  }
+
+  //calculate root relative path
+  const srcPathDiff = config.pathDiffToRelativePath(config.root(), config.rootSrc());
+  tmpl.rootRelativePath = srcPathDiff + tmpl.srcRootRelativePath;
+
   return tmpl;
 }
 exports.createGeneratorTemplateParams = createGeneratorTemplateParams;
@@ -156,6 +181,10 @@ gulp.task('generate:component', () => {
 
 gulp.task('generate:service', () => {
   return generate('service');
+});
+
+gulp.task('generate:model', () => {
+  return generate('model');
 });
 
 gulp.task('generate:directive', () => {

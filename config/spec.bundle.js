@@ -1,3 +1,4 @@
+/// <reference path="../typings/index.d.ts" />
 /*eslint prefer-template: 0*/
 /*eslint max-len: 0*/
 /*eslint no-undef: 0*/
@@ -22,11 +23,12 @@ const mocks = require('angular-mocks');
  */
 const chai = require('chai');
 const assertionError = require('assertion-error');
+const sinonChai = require('sinon-chai');
 
+chai.use(sinonChai);
 /**
  * NOTE: assertionError plugin is still doesn't capture stack trace when run under PhantomJS
  */
-
 chai.use(assertionError);
 chai.config.includeStack = true;
 
