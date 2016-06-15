@@ -184,6 +184,7 @@ module.exports.buildResolve = buildResolve;
 
 function buildPreLoaders() {
   return [
+    { test: /\.js$/, loader: 'ng-annotate', exclude: [/node_modules/] },
     /*
     * eslint loader support form *.js files
     *
@@ -237,7 +238,10 @@ function buildLoaders() {
         /node_modules/,
         excRx,
       ],
-      loader: 'ng-annotate!babel?compact=false',
+      loader: 'babel', //?optional=runtime',
+      query: {
+        plugins: ['transform-runtime'],
+      },
     },
 
     /*

@@ -1,7 +1,7 @@
 require('babel-core').transform('code', {
-  presets: ['es2015'],
+  presets: ['es2015', 'stage-0'],
+  plugins: ['transform-runtime'],
 });
-import 'babel-polyfill';
 module.exports.entry = ['babel-polyfill', '..'];
 
 /* Full config of gulp task located in ./config/gulp/*.js */
