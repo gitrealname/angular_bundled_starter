@@ -105,7 +105,7 @@ module.exports = (karmaConfig) => {
     },
 
     // Webpack please don't spam the console when running in karma!
-    webpackServer: { noInfo: true },
+    webpackServer: { quiet: true, noInfo: true, stats: { chunks: false }, progress: false, debug: false },
 
     /*
      * test results reporter to use

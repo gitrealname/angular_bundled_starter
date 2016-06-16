@@ -565,9 +565,13 @@ function buildDevServer() {
       return { from, to };
     });
 */
+  /**
+   * See https://webpack.github.io/docs/webpack-dev-server.html#webpack-dev-server-cli
+   */
   const cfg = {
     hot: true,
     inline: true,
+    colors: true,
     port: config.data.dev.port.port,
     host: config.data.dev.host,
     historyApiFallback: {
@@ -577,7 +581,7 @@ function buildDevServer() {
     },
     watchOptions: {
       aggregateTimeout: 300,
-      poll: 1000,
+      poll: 500,
     },
     outputPath: config.data.dest.dev ? config.root(config.data.dest.dev) : config.rootSrc(),
   };
@@ -643,7 +647,7 @@ function buildConfig() {
      *
      * See: http://webpack.github.io/docs/configuration.html#debug
      */
-    debug: !config.isEnvProd(),
+    debug: false, //!config.isEnvProd(),
 
     /**
      * Developer tool to enhance debugging
