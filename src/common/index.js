@@ -1,4 +1,5 @@
 import './common.styl';
+import {} from '../polyfills';
 import angular from 'angular';
 import commonComponentsModule from './components';
 import commonServicesModule from './services';

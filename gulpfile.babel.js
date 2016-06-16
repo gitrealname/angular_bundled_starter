@@ -1,8 +1,4 @@
-require('babel-core').transform('code', {
-  presets: ['es2015', 'stage-0'],
-  plugins: ['transform-runtime'],
-});
-module.exports.entry = ['babel-polyfill', '..'];
+require('babel-core').transform('code');
 
 /* Full config of gulp task located in ./config/gulp/*.js */
 import requiredir from 'require-dir';

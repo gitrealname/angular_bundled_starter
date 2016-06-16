@@ -238,10 +238,7 @@ function buildLoaders() {
         /node_modules/,
         excRx,
       ],
-      loader: 'babel', //?optional=runtime',
-      query: {
-        plugins: ['transform-runtime'],
-      },
+      loader: 'babel',
     },
 
     /*

@@ -15,6 +15,7 @@
 
 const angular = require('angular');
 const mocks = require('angular-mocks');
+const polyfills = require('../src/polyfills');
 
 /**
  * Configure chai (assertion framework)
