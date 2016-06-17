@@ -7,6 +7,7 @@
 * Useful links regarding unit-testing:
 * See: https://gist.github.com/yoavniran/1e3b0162e1545055429e
 *      http://sinonjs.org/docs/
+*      https://mochajs.org/
 */
 const expect = chai.expect;
 const spy = sinon.spy;
@@ -15,17 +16,16 @@ const stub = sinon.stub;
 import <%= camelName %>Model from './<%= lispName %>.model';
 import baseModel from '<%= srcRootRelativePath %>/common/models/base.model';
 
+beforeEach(angular.mock.module(($provide) => {
+  $provide.factory('BaseModel', baseModel);
+  $provide.factory('<%= camelCapName %>', <%= camelName %>Model);
+}));
+
 describe('<%= camelCapName %> model', () => {
   let Klass;
   let BaseKlass;
   let model;
   let baseModelStub;
-
-  /*declare model factory*/
-  beforeEach(angular.mock.module(($provide) => {
-    $provide.factory('BaseModel', baseModel);
-    $provide.factory('<%= camelCapName %>', <%= camelName %>Model);
-  }));
 
   beforeEach(inject((_<%= camelCapName %>_, _BaseModel_) => {
     Klass = _<%= camelCapName %>_;

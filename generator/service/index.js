@@ -5,6 +5,6 @@ import <%= camelCapName %>Service from './<%= lispName %>.service';
 export default angular.module('<%= dotedAppPrefix %><%= dotedLispParentFullName %>.services', [
 ])
 
-.service('<%= camelFullName %>Service', <%= camelCapName %>Service)
+.service('<%= camelName %>Service', <%= camelCapName %>Service)
 
 ;
