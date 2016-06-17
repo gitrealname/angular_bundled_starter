@@ -50,6 +50,9 @@ function buildOutput() {
   if (config.isBuildRelease()) {
     suffix = '.min.';
   }
+  if (config.isEnvTest() && config.isWatched()) {
+    suffix = '.[chunkhash].';
+  }
 
   const ret = {
     /**
@@ -320,6 +323,14 @@ function buildModule() {
     preLoaders: buildPreLoaders(),
     loaders: buildLoaders(),
     postLoaders: buildPostLoaders(),
+    noParse: [
+      config.rootNode('angular'),
+      config.rootNode('angular-route'),
+      config.rootNode('angular-ui-router'),
+      config.rootNode('angular-mocks'),
+      config.rootNode('jquery'),
+      config.rootNode('kendo-ui-core'),
+    ],
   };
 }
 module.exports.buildModule = buildModule;
@@ -465,6 +476,7 @@ function buildPlugins() {
       }),
 
       buildExtractTextPlugin(),
+
     ]);
   }
 
@@ -492,6 +504,17 @@ function buildPlugins() {
       new DedupePlugin(),
 
       buildUglifyJsPlugin(),
+    ]);
+  }
+
+  if (config.isWatched()) {
+    plst = plst.concat([
+      /**
+       * See: http://webpack.github.io/docs/list-of-plugins.html#prefetchplugin
+       */
+      //new webpack.PrefetchPlugin(config.rootNode(), 'core-js/shim.js'),
+      //new webpack.PrefetchPlugin(config.rootNode(), 'angular'),
+      new webpack.PrefetchPlugin(config.root(), config.data.dir.node),
     ]);
   }
 
@@ -581,7 +604,7 @@ function buildDevServer() {
     },
     watchOptions: {
       aggregateTimeout: 300,
-      poll: 500,
+      poll: 250,
     },
     outputPath: config.data.dest.dev ? config.root(config.data.dest.dev) : config.rootSrc(),
   };

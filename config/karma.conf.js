@@ -10,7 +10,7 @@ const webpackBuilder = require('./webpack.builder.js');
 const cfg = webpackBuilder.buildConfig();
 //config.debugInspectAndExit(cfg);
 
-//NOTE: some options get overriden from gulp/test.js depending on testing mode
+//NOTE: some options get overridden from gulp/test.js depending on testing mode
 
 module.exports = (karmaConfig) => {
   karmaConfig.set({
@@ -40,7 +40,6 @@ module.exports = (karmaConfig) => {
       'karma-sourcemap-loader',
       'karma-webpack',
       'karma-coverage',
-      'karma-babel-preprocessor',
     ],
 
     /**
