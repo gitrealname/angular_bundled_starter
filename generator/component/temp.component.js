@@ -3,36 +3,31 @@ import './<%= lispName %>.styl';
 import template from './<%= lispName %>.html';
 
 export class <%= camelCapName %>Controller {
-  constructor(configService) {
+  constructor($log) {
     'ngInject';
     //initialize
-    this.configService = configService;
+    this.$log = $log;
 
     //public
-    this.name = '<%= camelFullName %>';
-    this.description = 'loading from config...';
-    this.creationTime = new Date();
 
     //private
-    this.myPrivateVar = new Date();
   }
 
   /*
   * Event handlers
   */
   $onInit() {
-    this.description = 'no description';
-    console.log(`component '${this.name}' activated.`);
+    this.$log.log(`component '<%= dotedCamelFullName =>' activated.`);
   }
 
   $onDestroy() {
-    console.log(`component '${this.name}' destroyed.`);
+    this.$log.log(`component '<%= dotedCamelFullName =>' destroyed.`);
   }
 
   /*
   * Methods
   */
-} // TestController
+} // <%= camelCapName %>Controller
 
 export default {
   bindings: {},

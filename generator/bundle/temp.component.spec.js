@@ -16,14 +16,6 @@ import <%= camelName %>Module from './';
 import <%= camelName %>Component, { <%= camelCapName %>Controller } from './<%= lispName %>.component';
 import <%= camelName %>Template from './<%= lispName %>.html';
 
-class FakeConfigService {
-  get(key) {
-    return {
-      description: '<%= camelFullName %> description',
-    };
-  }
-}
-
 describe(' <%= dotedCamelCapFullName %> component', () => {
   let $rootScope;
   let makeController;
@@ -32,7 +24,7 @@ describe(' <%= dotedCamelCapFullName %> component', () => {
   beforeEach(inject((_$rootScope_) => {
     $rootScope = _$rootScope_;
     makeController = () => {
-      return new <%= camelCapName %>Controller(undefined, new FakeConfigService());
+      return new <%= camelCapName %>Controller($log, {});
     };
   }));
 
@@ -42,18 +34,11 @@ describe(' <%= dotedCamelCapFullName %> component', () => {
 
   describe('Controller', () => {
     // controller specs
-    it('has a name property [REMOVE]', () => { // erase if removing this.name from the controller
-      const controller = makeController();
-      expect(controller).to.have.property('name');
-    });
   });
 
   describe('Template', () => {
     // template specs
     // tip: use regex to ensure correct bindings are used e.g., {{  }}
-    it('has name in template [REMOVE]', () => {
-      expect(<%= camelName %>Template).to.match(/{{\s?vm\.name\s?}}/g);
-    });
   });
 
   describe('Component', () => {

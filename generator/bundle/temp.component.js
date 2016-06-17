@@ -3,44 +3,32 @@ import './<%= lispName %>.styl';
 import template from './<%= lispName %>.html';
 
 export class <%= camelCapName %>Controller {
-  constructor(<%= camelName %>Service, configService) {
+  constructor($log, configService) {
     'ngInject';
     //initialize
-    this.<%= camelName %>Service = <%= camelName %>Service;
+    this.$log = $log;
     this.configService = configService;
 
     //public
-    this.name = '<%= camelFullName %>';
-    this.description = 'loading from config...';
-    this.dataList = [];
-    this.creationTime = new Date();
 
     //private
-    this.myPrivateVar = new Date();
   }
 
   /*
   * Event handlers
   */
   $onInit() {
-    this.description = this.configService.get('<%= camelName %>').description;
-    console.log(`component '${this.name}' activated.`);
+    this.$log.log(`component '<%= dotedCamelFullName =>' activated.`);
   }
 
   $onDestroy() {
-    console.log(`component '${this.name}' destroyed.`);
+    this.$log.log(`component '<%= dotedCamelFullName =>' destroyed.`);
   }
 
   /*
   * Methods
   */
-  //get test model
-  onGetData() {
-    this.<%= camelName %>Service.getModel().then((result) => {
-      this.dataList = result.dataList || ['ERROR'];
-    });
-  }
-} // TestController
+} // <%= camelCapName %>Controller
 
 export default {
   bindings: {},
