@@ -19,7 +19,6 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const DedupePlugin = require('webpack/lib/optimize/DedupePlugin');
 const UglifyJsPlugin = require('webpack/lib/optimize/UglifyJsPlugin');
 
-
 /*
  * Webpack configurations building api that produces various configuration settings
  *  based on current environment (e.g. 'production' vs 'development' vs 'test')
@@ -179,7 +178,7 @@ function buildResolve() {
     root: [config.rootSrc()],
 
     // remove other default values
-    modulesDirectories: ['node_modules'],
+    modulesDirectories: [config.data.dir.node],
     alias: buildAlias(),
   };
 }
@@ -187,7 +186,6 @@ module.exports.buildResolve = buildResolve;
 
 function buildPreLoaders() {
   return [
-    { test: /\.js$/, loader: 'ng-annotate', exclude: [/node_modules/] },
     /*
     * eslint loader support form *.js files
     *
@@ -241,7 +239,7 @@ function buildLoaders() {
         /node_modules/,
         excRx,
       ],
-      loader: 'babel',
+      loader: 'ng-annotate!babel',
     },
 
     /*
@@ -512,9 +510,8 @@ function buildPlugins() {
       /**
        * See: http://webpack.github.io/docs/list-of-plugins.html#prefetchplugin
        */
-      //new webpack.PrefetchPlugin(config.rootNode(), 'core-js/shim.js'),
-      //new webpack.PrefetchPlugin(config.rootNode(), 'angular'),
-      new webpack.PrefetchPlugin(config.root(), config.data.dir.node),
+      new webpack.PrefetchPlugin(config.rootNode(), 'core-js/shim.js'),
+      new webpack.PrefetchPlugin(config.rootNode(), 'angular'),
     ]);
   }
 
@@ -607,6 +604,12 @@ function buildDevServer() {
       poll: 250,
     },
     outputPath: config.data.dest.dev ? config.root(config.data.dest.dev) : config.rootSrc(),
+    stats: {
+      colors: true,
+      modules: true,
+      reasons: true,
+      errorDetails: true,
+    },
   };
   return cfg;
 }

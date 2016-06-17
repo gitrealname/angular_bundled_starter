@@ -37,7 +37,7 @@ const common = 'common';
 const assets = 'AppContent';
 const mockServer = 'mock.server';
 const config = 'config';
-const appPrefix = 'xx';
+const appPrefix = 'ltss';
 const dotedAppPrefix = appPrefix.length ? appPrefix + '.' : ''; //used for module, directives and components names and prefixes; expected to have trailing '.' unless empty!
 const lispAppPrefix = appPrefix.length ? appPrefix + '-' : ''; //used for class names; expected to have trailing '-' unless empty!
 
@@ -65,7 +65,7 @@ const data = {
     coverage: 'test.coverage',
   },
   publish: {
-    root: '../mvc.project.root/', //relative to root or absolute path
+    root: '../Ltss.Web/', //relative to root or absolute path
     //relative to publish root
     content: assets,
     styles: assets,
@@ -430,7 +430,7 @@ if (env.APP_BUNDLES.length === 1) {
   env.ONLY_BUNDLE = true;
 }
 env.APP_BUNDLE_MODULES = env.APP_BUNDLES.map((v) => {
-  return nameToChunks(v, camelCase, false).join('');
+  return nameToChunks(v, lowerCase, false).join('-');
 });
 
 //debugInspectAndExit(dirMap);

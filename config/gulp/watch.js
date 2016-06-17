@@ -22,7 +22,7 @@ function prependEntriesWithHotMiddleware(entry) {
     // it responsible for all this webpack magic.
     //NOTE: magic doesn't seem to be working correctly with angular
     //  see index.html for logic that forces reload after change.
-    entry[key].push('webpack-hot-middleware/client?reload=true');
+    entry[key].unshift('webpack-hot-middleware/client?reload=true');
   });
 }
 
@@ -50,6 +50,8 @@ gulp.task('watch', 'Run dev server with "hot replacement"', () => {
           colors: colorsSupported,
           chunks: false,
           modules: false,
+          reasons: true,
+          errorDetails: true,
         },
         publicPath: webpackConfig.output.publicPath,
       }),
