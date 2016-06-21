@@ -10,7 +10,7 @@
     "url": "https://localhost"
   },
   "scripts": {
-    "postinstall": "typings install"
+    "postinstall": "typings install && cmd /C mklink /J src\\Content ..\\Ltss.Web\\Content"
   },
   "keywords": [
     "angular",
@@ -21,7 +21,7 @@
     "assertion-error": "^1.0.2",
     "awesome-typescript-loader": "^0.17.0",
     "babel-core": "^6.9.1",
-    "babel-eslint": "^6.0.4",
+    "babel-eslint": "^6.0.5",
     "babel-loader": "^6.2.4",
     "babel-plugin-transform-runtime": "^6.9.0",
     "babel-polyfill": "^6.9.1",

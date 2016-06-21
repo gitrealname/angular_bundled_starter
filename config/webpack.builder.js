@@ -230,6 +230,7 @@ function buildLoaders() {
   }
 
   const m = config.isBuildDebug() ? '-minimize' : 'minimize';
+  const cache = config.isEnvProd() ? '?cacheDirectory' : '';
   const excRx = excludeRx();
   const src = config.rootSrc();
   let lst = [
@@ -239,7 +240,7 @@ function buildLoaders() {
         /node_modules/,
         excRx,
       ],
-      loader: 'ng-annotate!babel',
+      loader: `ng-annotate!babel${cache}`,
     },
 
     /*
@@ -427,8 +428,7 @@ function buildPlugins() {
     }),
   ];
 
-  if (config.isEnvTest()) {
-  } else {
+  if (!config.isEnvTest()) {
     plst = plst.concat([
       /*
       * Plugin: HtmlWebpackPlugin
@@ -475,6 +475,7 @@ function buildPlugins() {
 
       buildExtractTextPlugin(),
 
+      new webpack.NoErrorsPlugin(),
     ]);
   }
 
@@ -484,8 +485,6 @@ function buildPlugins() {
       // reloading page after webpack rebuilt modules.
       // It also updates stylesheets and inline assets without page reloading.
       new webpack.HotModuleReplacementPlugin(),
-
-      new webpack.NoErrorsPlugin(),
     ]);
   }
 
