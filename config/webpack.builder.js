@@ -230,7 +230,7 @@ function buildLoaders() {
   }
 
   const m = config.isBuildDebug() ? '-minimize' : 'minimize';
-  const cache = config.isEnvProd() ? '?cacheDirectory' : '';
+  const cache = !config.isEnvProd() ? '?cacheDirectory' : '';
   const excRx = excludeRx();
   const src = config.rootSrc();
   let lst = [

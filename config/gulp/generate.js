@@ -9,6 +9,8 @@ const gulp = require('gulp-help')(require('gulp'));
 import rename from 'gulp-rename';
 import template from 'gulp-template';
 import readline from 'readline-sync';
+/*need this to have overwrite option in the dest*/
+import vfs from 'vinyl-fs';
 
 import config from '../config';
 
@@ -123,7 +125,7 @@ function createGeneratorTemplateParams(componentType) {
   if (tmpl.destDirSuffix) {
     tmpl.slashedLispFullDir += '/' + tmpl.destDirSuffix;
   }
-  if (componentType === 'component' || componentType === 'directive' || componentType === 'bundle') {
+  if (componentType === 'component' || componentType === 'bundle') {
     tmpl.slashedLispFullDir += '/' + tmpl.lispName;
   }
   tmpl.slashedLispFullDir = tmpl.slashedLispFullDir.replace(/[\/]+/g, '/');
@@ -168,7 +170,9 @@ function generate(componentType) {
     .pipe(rename((p) => {
       p.basename = p.basename.replace('temp', tmpl.lispName);
     }))
-    .pipe(gulp.dest(destPath));
+    .pipe(vfs.dest(destPath, {
+      overwrite: false,
+    }));
 }
 
 gulp.task('generate:bundle', () => {
@@ -188,6 +192,5 @@ gulp.task('generate:model', () => {
 });
 
 gulp.task('generate:directive', () => {
-  config.error('Directive generation is not yet implemented');
-  //return generate('directive', 'directives', true, false, false);
+  return generate('directive');
 });
