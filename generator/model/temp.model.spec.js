@@ -8,6 +8,7 @@
 * See: https://gist.github.com/yoavniran/1e3b0162e1545055429e
 *      http://sinonjs.org/docs/
 *      https://mochajs.org/
+*      https://github.com/domenic/sinon-chai
 */
 const expect = chai.expect;
 const spy = sinon.spy;

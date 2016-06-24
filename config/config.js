@@ -8,15 +8,16 @@
 import util from 'util';
 
 /*
-* Naming case variations terminology
-* See: https://en.wikipedia.org/wiki/Letter_case#Special_case_styles
-*/
+ * Naming case variations terminology
+ * See: https://en.wikipedia.org/wiki/Letter_case#Special_case_styles
+ */
 import console from 'console';
 import path from 'path';
 import glob from 'glob';
 import fs from 'fs';
 import gutil from 'gulp-util';
 import colors from 'colors';
+import trueCasePathSync from 'true-case-path';
 const argv = require('yargs')
   .alias('p', 'parent')
   .alias('n', 'name')
@@ -27,8 +28,8 @@ const argv = require('yargs')
   .argv;
 
 /*
-* Build system configuration
-*/
+ * Build system configuration
+ */
 const src = 'src';
 const node = 'node_modules';
 const generator = 'generator';
@@ -122,11 +123,15 @@ const env = {
 exports.env = env;
 
 /*
-* Helper functions
-*/
+ * Helper functions
+ */
 function debugInspectAndExit(...args) {
   args.forEach((o) => {
-    console.log(util.inspect(o, { colors: true, depth: 10, showHidden: false }));
+    console.log(util.inspect(o, {
+      colors: true,
+      depth: 10,
+      showHidden: false,
+    }));
   });
   process.exit(1);
 }
@@ -134,7 +139,11 @@ exports.debugInspectAndExit = debugInspectAndExit;
 
 function inspect(...args) {
   args.forEach((o) => {
-    console.log(util.inspect(o, { colors: true, depth: 10, showHidden: false }));
+    console.log(util.inspect(o, {
+      colors: true,
+      depth: 10,
+      showHidden: false,
+    }));
   });
 }
 exports.inspect = inspect;
@@ -158,7 +167,7 @@ function warn(...arg) {
 }
 exports.warn = warn;
 
-const rootPath = path.resolve(__dirname, '..');
+const rootPath = trueCasePathSync(path.resolve(__dirname, '..'));
 
 function root(args) {
   args = Array.prototype.slice.call(arguments, 0);
@@ -174,9 +183,10 @@ function rootSrc(args) {
 exports.rootSrc = rootSrc;
 
 let currentPulishingRoot = data.publish.root;
+
 function rootPublish(args) {
   args = Array.prototype.slice.call(arguments, 0);
-  let dir = path.resolve('', currentPulishingRoot);
+  let dir = trueCasePathSync(path.resolve('', currentPulishingRoot));
   if (!dirExists(dir)) {
     dir = root(currentPulishingRoot);
     if (!dirExists(dir)) {
@@ -342,8 +352,8 @@ function setBackendServerUrlFromOrDefault(cmdParamName) {
 exports.setBackendServerUrlFromOrDefault = setBackendServerUrlFromOrDefault;
 
 /*
-* Process command line parameters and create halping data sets
-*/
+ * Process command line parameters and create halping data sets
+ */
 const names = [].concat(getProcessingFlag('name') || []);
 data.nameList = names;
 
@@ -365,8 +375,8 @@ const masterBundle = listedBundleNames.reduce((prev, v) => {
 env.ONLY_BUNDLE = nonCommonBundleCount === 1;
 
 /*
-* Prepare webpack Entry map
-*/
+ * Prepare webpack Entry map
+ */
 
 //get all dirs (relative to 'src' directory)
 const srcDirs = glob.sync(rootSrc('**'), { })
@@ -418,7 +428,11 @@ srcDirs.filter((d) => {
     if (![possibleEntryFiles].length) {
       ret = false;
     } else {
-      entryMap[key] = { script: possibleEntryFiles[0], html: fileSuffix + '.html', isCommon };
+      entryMap[key] = {
+        script: possibleEntryFiles[0],
+        html: fileSuffix + '.html',
+        isCommon,
+      };
     }
   }
   return ret;
@@ -439,8 +453,8 @@ env.APP_BUNDLE_MODULES = env.APP_BUNDLES.map((v) => {
 //debugInspectAndExit(env);
 
 function pathDiffToRelativePath(srcPath, destPath) {
-  srcPath = path.resolve(srcPath);
-  destPath = path.resolve(destPath);
+  srcPath = trueCasePathSync(path.resolve(srcPath));
+  destPath = trueCasePathSync(path.resolve(destPath));
   const srcChunks = srcPath.split(/[\/\\]+/);
   const destChunks = destPath.split(/[\/\\]+/);
   const commonChunks = destChunks.reduce((prev, v, i) => {
@@ -464,19 +478,60 @@ exports.pathDiffToRelativePath = pathDiffToRelativePath;
 
 
 /*
-* Adjust environemnt. Application will have access to env through 'process.env'
-*/
-exports.setEnvProdRelease = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod; env.BUILD = data.build.release; data.currentDest = data.dest.prod; };
-exports.setEnvProdDebug = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod; env.BUILD = data.build.debug; data.currentDest = data.dest.prod; };
-exports.setEnvDev = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'development'; env.BUILD = 'debug'; env.WATCH = true; data.currentDest = data.dest.dev; };
-exports.setEnvDevWatch = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'development'; env.WATCH = true; data.currentDest = data.dest.dev; };
-exports.setEnvTest = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'test'; env.BUILD = 'test'; env.WATCH = false; data.currentDest = data.dest.test; };
-exports.setEnvTestWatch = () => { process.env.NODE_ENV = process.env.ENV = env.ENV = 'test'; env.BUILD = 'test'; env.WATCH = true; data.currentDest = data.dest.test; };
+ * Adjust environemnt. Application will have access to env through 'process.env'
+ */
+exports.setEnvProdRelease = () => {
+  process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod;
+  env.BUILD = data.build.release;
+  data.currentDest = data.dest.prod;
+};
+exports.setEnvProdDebug = () => {
+  process.env.NODE_ENV = process.env.ENV = env.ENV = data.env.prod;
+  env.BUILD = data.build.debug;
+  data.currentDest = data.dest.prod;
+};
+exports.setEnvDev = () => {
+  process.env.NODE_ENV = process.env.ENV = env.ENV = 'development';
+  env.BUILD = 'debug';
+  env.WATCH = true;
+  data.currentDest = data.dest.dev;
+};
+exports.setEnvDevWatch = () => {
+  process.env.NODE_ENV = process.env.ENV = env.ENV = 'development';
+  env.WATCH = true;
+  data.currentDest = data.dest.dev;
+};
+exports.setEnvTest = () => {
+  process.env.NODE_ENV = process.env.ENV = env.ENV = 'test';
+  env.BUILD = 'test';
+  env.WATCH = false;
+  data.currentDest = data.dest.test;
+};
+exports.setEnvTestWatch = () => {
+  process.env.NODE_ENV = process.env.ENV = env.ENV = 'test';
+  env.BUILD = 'test';
+  env.WATCH = true;
+  data.currentDest = data.dest.test;
+};
 
-exports.isEnvProd = () => { return env.ENV === data.env.prod; };
-exports.isEnvDev = () => { return env.ENV === data.env.dev; };
-exports.isEnvTest = () => { return env.ENV === data.env.test; };
-exports.isBuildRelease = () => { return env.BUILD === data.build.release; };
-exports.isBuildDebug = () => { return env.BUILD === data.build.debug; };
-exports.isBuildTest = () => { return env.BUILD === data.build.test; };
-exports.isWatched = () => { return env.WATCH === true; };
+exports.isEnvProd = () => {
+  return env.ENV === data.env.prod;
+};
+exports.isEnvDev = () => {
+  return env.ENV === data.env.dev;
+};
+exports.isEnvTest = () => {
+  return env.ENV === data.env.test;
+};
+exports.isBuildRelease = () => {
+  return env.BUILD === data.build.release;
+};
+exports.isBuildDebug = () => {
+  return env.BUILD === data.build.debug;
+};
+exports.isBuildTest = () => {
+  return env.BUILD === data.build.test;
+};
+exports.isWatched = () => {
+  return env.WATCH === true;
+};
