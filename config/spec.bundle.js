@@ -26,6 +26,7 @@ const chai = require('chai');
 const assertionError = require('assertion-error');
 const sinonChai = require('sinon-chai');
 
+chai.should();
 chai.use(sinonChai);
 /**
  * NOTE: assertionError plugin is still doesn't capture stack trace when run under PhantomJS
